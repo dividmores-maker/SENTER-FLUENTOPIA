@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلاب - نظام إدارة السنتر التعليمي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .page-header h1 {
+            color: #667eea;
+            font-size: 32px;
+        }
+
+        .add-student-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+
+        .add-student-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .search-filter {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .search-filter input:focus,
+        .search-filter select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .students-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .students-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .students-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .edit-btn {
+            background: #4facfe;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #f5576c;
+            color: white;
+        }
+
+        .edit-btn:hover, .delete-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #667eea;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #667eea;
+            clear: both;
+            padding-top: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* ── Firebase Status Bar ── */
+        .firebase-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all .3s;
+        }
+        .firebase-bar.connected  { background:#d4edda; color:#155724; border:2px solid #28a745; }
+        .firebase-bar.error      { background:#f8d7da; color:#721c24; border:2px solid #dc3545; }
+        .firebase-bar.connecting { background:#fff3cd; color:#856404; border:2px solid #ffc107; }
+        .firebase-bar.saving     { background:#e3f2fd; color:#1565c0; border:2px solid #2196f3; }
+        .firebase-dot {
+            width:12px; height:12px; border-radius:50%; flex-shrink:0;
+        }
+        .firebase-dot.connected  { background:#28a745; box-shadow:0 0 8px #28a745; animation:fbBlink 2s infinite; }
+        .firebase-dot.error      { background:#dc3545; }
+        .firebase-dot.connecting { background:#ffc107; animation:fbBlink .6s infinite; }
+        .firebase-dot.saving     { background:#2196f3; animation:fbBlink .4s infinite; }
+        @keyframes fbBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="logo">
+                🎓 إدارة الطلاب
+            </div>
+            <a href="index.html" class="back-btn">← العودة للصفحة الرئيسية</a>
+        </nav>
+
+        <!-- Firebase Status Bar -->
+        <div class="firebase-bar connecting" id="firebaseStatusBar">
+            <div class="firebase-dot connecting" id="firebaseDot"></div>
+            <span id="firebaseMsg">🔌 جاري الاتصال بـ Firebase...</span>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="page-header">
+                <h1>👨‍🎓 إدارة بيانات الطلاب</h1>
+                <button class="add-student-btn" onclick="openAddModal()">➕ إضافة طالب جديد</button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="number" id="totalStudentsCount">0</div>
+                    <div class="label">إجمالي الطلاب</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="number" id="classesCount">0</div>
+                    <div class="label">عدد الفصول</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="number" id="subjectsCount">0</div>
+                    <div class="label">عدد المواد</div>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="search-filter">
+                <input type="text" id="searchInput" placeholder="🔍 البحث بالاسم أو رقم الهاتف..." oninput="filterStudents()">
+                <select id="classFilter" onchange="filterStudents()">
+                    <option value="">جميع الفصول</option>
+                    <option value="الصف الأول الابتدائي">الصف الأول الابتدائي</option>
+                    <option value="الصف الثاني الابتدائي">الصف الثاني الابتدائي</option>
+                    <option value="الصف الثالث الابتدائي">الصف الثالث الابتدائي</option>
+                    <option value="الصف الرابع الابتدائي">الصف الرابع الابتدائي</option>
+                    <option value="الصف الخامس الابتدائي">الصف الخامس الابتدائي</option>
+                    <option value="الصف السادس الابتدائي">الصف السادس الابتدائي</option>
+                    <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
+                    <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
+                    <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
+                </select>
+                <select id="subjectFilter" onchange="filterStudents()">
+                    <option value="">جميع المواد</option>
+                    <option value="math">رياضيات</option>
+                    <option value="science">علوم</option>
+                    <option value="arabic">عربي</option>
+                    <option value="english">إنجليزي</option>
+                    <option value="studies">دراسات</option>
+                </select>
+            </div>
+
+            <!-- Students Table -->
+            <div id="studentsTableContainer">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الصف الدراسي</th>
+                            <th>المواد</th>
+                            <th>تاريخ الميلاد</th>
+                            <th>السن</th>
+                            <th>رقم الهاتف</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                    </tbody>
+                </table>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="icon">👨‍🎓</div>
+                    <h3>لا توجد بيانات طلاب</h3>
+                    <p>ابدأ بإضافة طالب جديد</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            
+            <div class="modal-header">
+                <h2 id="modalTitle">➕ إضافة طالب جديد</h2>
+            </div>
+
+            <form id="studentForm" onsubmit="saveStudent(event)">
+                <div class="form-group">
+                    <label>الاسم الكامل *</label>
+                    <input type="text" id="studentName" required placeholder="أدخل الاسم الكامل">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>الصف الدراسي *</label>
+                        <select id="studentClass" required>
+                            <option value="">اختر الصف</option>
+                            <optgroup label="المرحلة الابتدائية">
+                                <option value="الصف الأول الابتدائي">الصف الأول الابتدائي</option>
+                                <option value="الصف الثاني الابتدائي">الصف الثاني الابتدائي</option>
+                                <option value="الصف الثالث الابتدائي">الصف الثالث الابتدائي</option>
+                                <option value="الصف الرابع الابتدائي">الصف الرابع الابتدائي</option>
+                                <option value="الصف الخامس الابتدائي">الصف الخامس الابتدائي</option>
+                                <option value="الصف السادس الابتدائي">الصف السادس الابتدائي</option>
+                            </optgroup>
+                            <optgroup label="المرحلة الإعدادية">
+                                <option value="الصف الأول الإعدادي">الصف الأول الإعدادي</option>
+                                <option value="الصف الثاني الإعدادي">الصف الثاني الإعدادي</option>
+                                <option value="الصف الثالث الإعدادي">الصف الثالث الإعدادي</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>المواد * (يمكن اختيار أكثر من مادة)</label>
+                        <div id="subjectsCheckboxes" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; background: #f8f9fa;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="subjects" value="math" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>📐 رياضيات</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="subjects" value="science" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>🔬 علوم</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="subjects" value="arabic" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>📝 عربي</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="subjects" value="english" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>🔤 إنجليزي</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="subjects" value="studies" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>🌍 دراسات</span>
+                            </label>
+                        </div>
+                        <small id="subjectsError" style="color: #f5576c; display: none; margin-top: 5px;">يجب اختيار مادة واحدة على الأقل</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تاريخ الميلاد *</label>
+                        <input type="date" id="studentBirthdate" required onchange="calculateAge()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>السن</label>
+                        <input type="text" id="studentAge" readonly placeholder="يتم حسابه تلقائياً">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>رقم الهاتف *</label>
+                    <input type="tel" id="studentPhone" required placeholder="01xxxxxxxxx" pattern="[0-9]{11}">
+                </div>
+
+                <div class="form-group">
+                    <label>عنوان السكن</label>
+                    <textarea id="studentAddress" rows="3" placeholder="أدخل العنوان"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea id="studentNotes" rows="3" placeholder="أي ملاحظات إضافية"></textarea>
+                </div>
+
+                <input type="hidden" id="studentId">
+                <button type="submit" class="submit-btn">💾 حفظ البيانات</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        // ══════════════════════════════════════════
+        //  Firebase Config
+        // ══════════════════════════════════════════
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZCGljrXbTP38-MZwzsxOZ8HK34Fykk8o",
+            authDomain: "senter-4e169.firebaseapp.com",
+            projectId: "senter-4e169",
+            storageBucket: "senter-4e169.firebasestorage.app",
+            messagingSenderId: "235178743750",
+            appId: "1:235178743750:web:e4419cfea51a404f2e44c7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db  = getFirestore(app);
+
+        // ── Firebase Status ──────────────────────
+        function setFbStatus(state, msg) {
+            const bar = document.getElementById('firebaseStatusBar');
+            const dot = document.getElementById('firebaseDot');
+            const txt = document.getElementById('firebaseMsg');
+            if (!bar) return;
+            bar.className = 'firebase-bar ' + state;
+            dot.className = 'firebase-dot ' + state;
+            txt.textContent = msg;
+        }
+
+        // ══════════════════════════════════════════
+        //  State
+        // ══════════════════════════════════════════
+        let students        = [];
+        let editingStudentId = null;
+
+        // ══════════════════════════════════════════
+        //  Save to Firestore
+        // ══════════════════════════════════════════
+        async function saveToFirestore() {
+            setFbStatus('saving', '💾 جاري الحفظ على Firebase...');
+            try {
+                await setDoc(doc(db, 'students', 'data'), { students });
+                setFbStatus('connected', '🔥 Firebase — تم الحفظ ✔');
+            } catch(e) {
+                console.error('Save error:', e);
+                setFbStatus('error', '❌ خطأ في الحفظ — ' + e.message);
+            }
+        }
+
+        // ══════════════════════════════════════════
+        //  Realtime Listener
+        // ══════════════════════════════════════════
+        function startListener() {
+            onSnapshot(
+                doc(db, 'students', 'data'),
+                (snap) => {
+                    students = snap.exists() ? (snap.data().students || []) : [];
+                    setFbStatus('connected', '🔥 Firebase متصل — البيانات محدّثة لحظياً');
+                    displayStudents();
+                    updateStats();
+                },
+                (err) => {
+                    console.error('Listener error:', err);
+                    setFbStatus('error', '❌ خطأ في الاتصال — تأكد من Firebase Rules');
+                }
+            );
+        }
+
+        // ══════════════════════════════════════════
+        //  Helper Functions
+        // ══════════════════════════════════════════
+        function getSubjectName(subject) {
+            const subjects = {
+                'math': 'رياضيات', 'science': 'علوم',
+                'arabic': 'عربي',   'english': 'إنجليزي', 'studies': 'دراسات'
+            };
+            return subjects[subject] || subject;
+        }
+
+        function getSubjectsDisplay(subjectsArray) {
+            if (!subjectsArray || !Array.isArray(subjectsArray)) return '-';
+            return subjectsArray.map(s => getSubjectName(s)).join(', ');
+        }
+
+        function calculateAge() {
+            const birthdate = document.getElementById('studentBirthdate').value;
+            if (birthdate) {
+                const today = new Date();
+                const birth = new Date(birthdate);
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                    age--;
+                }
+                document.getElementById('studentAge').value = age + ' سنة';
+            }
+        }
+
+        // ══════════════════════════════════════════
+        //  Display & Stats
+        // ══════════════════════════════════════════
+        function displayStudents(list) {
+            const data = list || students;
+            const tbody = document.getElementById('studentsTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                emptyState.innerHTML = `
+                    <div class="icon">👨‍🎓</div>
+                    <h3>لا توجد بيانات طلاب</h3>
+                    <p>ابدأ بإضافة طالب جديد</p>
+                `;
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tbody.innerHTML = data.map(student => `
+                <tr>
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.class}</td>
+                    <td>${getSubjectsDisplay(student.subjects)}</td>
+                    <td>${new Date(student.birthdate).toLocaleDateString('ar-EG')}</td>
+                    <td>${student.age}</td>
+                    <td>${student.phone}</td>
+                    <td class="action-btns">
+                        <button class="edit-btn" onclick="editStudent('${student.id}')">✏️ تعديل</button>
+                        <button class="delete-btn" onclick="deleteStudent('${student.id}')">🗑️ حذف</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalStudentsCount').textContent = students.length;
+            const uniqueClasses = [...new Set(students.map(s => s.class))];
+            document.getElementById('classesCount').textContent = uniqueClasses.length;
+            const allSubjects = new Set();
+            students.forEach(s => { if (s.subjects) s.subjects.forEach(sub => allSubjects.add(sub)); });
+            document.getElementById('subjectsCount').textContent = allSubjects.size;
+        }
+
+        // ══════════════════════════════════════════
+        //  Modal Functions
+        // ══════════════════════════════════════════
+        function openAddModal() {
+            editingStudentId = null;
+            document.getElementById('modalTitle').textContent = '➕ إضافة طالب جديد';
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentAge').value = '';
+            document.querySelectorAll('input[name="subjects"]').forEach(cb => cb.checked = false);
+            document.getElementById('subjectsError').style.display = 'none';
+            document.getElementById('studentModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function editStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+
+            editingStudentId = id;
+            document.getElementById('modalTitle').textContent = '✏️ تعديل بيانات الطالب';
+            document.getElementById('studentId').value        = student.id;
+            document.getElementById('studentName').value      = student.name;
+            document.getElementById('studentClass').value     = student.class;
+            document.getElementById('studentBirthdate').value = student.birthdate;
+            document.getElementById('studentAge').value       = student.age;
+            document.getElementById('studentPhone').value     = student.phone;
+            document.getElementById('studentAddress').value   = student.address || '';
+            document.getElementById('studentNotes').value     = student.notes || '';
+
+            document.querySelectorAll('input[name="subjects"]').forEach(cb => {
+                cb.checked = student.subjects && student.subjects.includes(cb.value);
+            });
+
+            document.getElementById('studentModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('studentModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('studentForm').reset();
+            document.querySelectorAll('input[name="subjects"]').forEach(cb => cb.checked = false);
+            document.getElementById('subjectsError').style.display = 'none';
+            editingStudentId = null;
+        }
+
+        function saveStudent(event) {
+            event.preventDefault();
+
+            const selectedSubjects = Array.from(document.querySelectorAll('input[name="subjects"]:checked'))
+                .map(cb => cb.value);
+
+            if (selectedSubjects.length === 0) {
+                document.getElementById('subjectsError').style.display = 'block';
+                return;
+            }
+            document.getElementById('subjectsError').style.display = 'none';
+
+            const student = {
+                id:        editingStudentId || Date.now().toString(),
+                name:      document.getElementById('studentName').value,
+                class:     document.getElementById('studentClass').value,
+                subjects:  selectedSubjects,
+                birthdate: document.getElementById('studentBirthdate').value,
+                age:       document.getElementById('studentAge').value,
+                phone:     document.getElementById('studentPhone').value,
+                address:   document.getElementById('studentAddress').value,
+                notes:     document.getElementById('studentNotes').value,
+                createdAt: editingStudentId
+                    ? students.find(s => s.id === editingStudentId)?.createdAt
+                    : new Date().toISOString()
+            };
+
+            if (editingStudentId) {
+                const index = students.findIndex(s => s.id === editingStudentId);
+                students[index] = student;
+            } else {
+                students.push(student);
+            }
+
+            saveToFirestore();
+            closeModal();
+            alert(editingStudentId ? 'تم تحديث بيانات الطالب بنجاح ✅' : 'تم إضافة الطالب بنجاح ✅');
+        }
+
+        function deleteStudent(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
+                students = students.filter(s => s.id !== id);
+                saveToFirestore();
+                alert('تم حذف الطالب بنجاح ✅');
+            }
+        }
+
+        function filterStudents() {
+            const searchTerm   = document.getElementById('searchInput').value.toLowerCase();
+            const classFilter  = document.getElementById('classFilter').value;
+            const subjectFilter = document.getElementById('subjectFilter').value;
+
+            const filtered = students.filter(student => {
+                const matchesSearch  = student.name.toLowerCase().includes(searchTerm) ||
+                                       student.phone.includes(searchTerm);
+                const matchesClass   = !classFilter   || student.class === classFilter;
+                const matchesSubject = !subjectFilter  || (student.subjects && student.subjects.includes(subjectFilter));
+                return matchesSearch && matchesClass && matchesSubject;
+            });
+
+            displayStudents(filtered);
+        }
+
+        // ══════════════════════════════════════════
+        //  تصدير الدوال للـ window عشان onclick يشتغل
+        // ══════════════════════════════════════════
+        window.openAddModal    = openAddModal;
+        window.editStudent     = editStudent;
+        window.deleteStudent   = deleteStudent;
+        window.closeModal      = closeModal;
+        window.saveStudent     = saveStudent;
+        window.filterStudents  = filterStudents;
+        window.calculateAge    = calculateAge;
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('studentModal')) {
+                closeModal();
+            }
+        };
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeModal();
+        });
+
+        // ══════════════════════════════════════════
+        //  Init
+        // ══════════════════════════════════════════
+        setFbStatus('connecting', '🔌 جاري الاتصال بـ Firebase...');
+        startListener();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المدرسين</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box .label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .teachers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .teacher-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .teacher-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .teacher-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .teacher-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .teacher-info h3 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .teacher-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .teacher-details {
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .detail-item .icon {
+            font-size: 18px;
+            width: 25px;
+        }
+
+        .subjects-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .subject-tag {
+            background: #e3f2fd;
+            color: #2196f3;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .teacher-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .teacher-actions button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* ── Firebase Status Bar ── */
+        .firebase-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all .3s;
+        }
+        .firebase-bar.connected  { background:#d4edda; color:#155724; border:2px solid #28a745; }
+        .firebase-bar.error      { background:#f8d7da; color:#721c24; border:2px solid #dc3545; }
+        .firebase-bar.connecting { background:#fff3cd; color:#856404; border:2px solid #ffc107; }
+        .firebase-bar.saving     { background:#e3f2fd; color:#1565c0; border:2px solid #2196f3; }
+        .firebase-dot {
+            width:12px; height:12px; border-radius:50%; flex-shrink:0;
+        }
+        .firebase-dot.connected  { background:#28a745; box-shadow:0 0 8px #28a745; animation:fbBlink 2s infinite; }
+        .firebase-dot.error      { background:#dc3545; }
+        .firebase-dot.connecting { background:#ffc107; animation:fbBlink .6s infinite; }
+        .firebase-dot.saving     { background:#2196f3; animation:fbBlink .4s infinite; }
+        @keyframes fbBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>👨‍🏫 إدارة المدرسين</h1>
+                <p style="color: #999; margin-top: 5px;">معلومات المدرسين والمواد التي يدرسونها</p>
+            </div>
+            <div class="header-buttons">
+                <button class="btn" onclick="showAddTeacherModal()">➕ إضافة مدرس</button>
+                <a href="index.html" class="btn btn-warning">🏠 الرئيسية</a>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Firebase Status Bar -->
+        <div class="firebase-bar connecting" id="firebaseStatusBar">
+            <div class="firebase-dot connecting" id="firebaseDot"></div>
+            <span id="firebaseMsg">🔌 جاري الاتصال بـ Firebase...</span>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="number" id="totalTeachers">0</div>
+                <div class="label">إجمالي المدرسين</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="activeTeachers">0</div>
+                <div class="label">مدرس نشط</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="totalSubjects">0</div>
+                <div class="label">مادة متاحة</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="totalSalary">0</div>
+                <div class="label">إجمالي الرواتب (جنيه)</div>
+            </div>
+        </div>
+
+        <!-- Teachers Grid -->
+        <div class="teachers-grid" id="teachersGrid"></div>
+    </div>
+
+    <!-- Add/Edit Teacher Modal -->
+    <div class="modal" id="addTeacherModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="teacherModalTitle">➕ إضافة مدرس جديد</h2>
+                <button class="close-btn" onclick="closeModal('addTeacherModal')">&times;</button>
+            </div>
+            <form id="teacherForm" onsubmit="saveTeacher(event)">
+                <input type="hidden" id="teacherId">
+                <div class="form-group">
+                    <label>اسم المدرس</label>
+                    <input type="text" id="teacherName" placeholder="أ. محمد أحمد" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف</label>
+                    <input type="tel" id="teacherPhone" placeholder="01012345678" required>
+                </div>
+                <div class="form-group">
+                    <label>الرقم القومي</label>
+                    <input type="email" id="teacherEmail" placeholder="20++++++++++++">
+                </div>
+                <div class="form-group">
+                    <label>الراتب (جنيه)</label>
+                    <input type="number" id="teacherSalary" placeholder="5000" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>المواد التي يدرسها</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject_math" value="math">
+                            <label for="subject_math">رياضيات</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject_arabic" value="arabic">
+                            <label for="subject_arabic">لغة عربية</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject_english" value="english">
+                            <label for="subject_english">لغة إنجليزية</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject_science" value="science">
+                            <label for="subject_science">علوم</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject_social" value="social">
+                            <label for="subject_social">دراسات اجتماعية</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject_religion" value="religion">
+                            <label for="subject_religion">تربية دينية</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="subject_computer" value="computer">
+                            <label for="subject_computer">حاسب آلي</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea id="teacherNotes" placeholder="ملاحظات إضافية (اختياري)" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn" style="flex: 1;">✓ حفظ</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal('addTeacherModal')">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        // ══════════════════════════════════════════
+        //  Firebase Config
+        // ══════════════════════════════════════════
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZCGljrXbTP38-MZwzsxOZ8HK34Fykk8o",
+            authDomain: "senter-4e169.firebaseapp.com",
+            projectId: "senter-4e169",
+            storageBucket: "senter-4e169.firebasestorage.app",
+            messagingSenderId: "235178743750",
+            appId: "1:235178743750:web:e4419cfea51a404f2e44c7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db  = getFirestore(app);
+
+        // ── Firebase Status ─────────────────────
+        function setFbStatus(state, msg) {
+            const bar = document.getElementById('firebaseStatusBar');
+            const dot = document.getElementById('firebaseDot');
+            const txt = document.getElementById('firebaseMsg');
+            if (!bar) return;
+            bar.className = 'firebase-bar ' + state;
+            dot.className = 'firebase-dot ' + state;
+            txt.textContent = msg;
+        }
+
+        // ══════════════════════════════════════════
+        //  Default Data
+        // ══════════════════════════════════════════
+        function defaultTeachers() {
+            return [
+                { id:1, name:'أ. محمد أحمد',  phone:'01012345678', email:'mohamed@example.com', salary:5000, subjects:['math','science'], notes:'مدرس متميز', active:true },
+                { id:2, name:'أ. فاطمة علي',  phone:'01098765432', email:'fatma@example.com',   salary:4500, subjects:['arabic'],          notes:'',         active:true },
+                { id:3, name:'أ. خالد محمود', phone:'01055556666', email:'khaled@example.com',  salary:5500, subjects:['science'],         notes:'',         active:true }
+            ];
+        }
+
+        // ══════════════════════════════════════════
+        //  Migration: localStorage → Firestore
+        // ══════════════════════════════════════════
+        async function migrateIfNeeded() {
+            const local = localStorage.getItem('teachers');
+            if (!local) return;
+            try {
+                const snap = await getDoc(doc(db, 'teachers', 'data'));
+                if (!snap.exists()) {
+                    const parsed = JSON.parse(local);
+                    await setDoc(doc(db, 'teachers', 'data'), {
+                        teachers: parsed,
+                        nextTeacherId: Math.max(...parsed.map(t => t.id)) + 1
+                    });
+                    console.log('✅ تم نقل بيانات المدرسين لـ Firebase');
+                }
+                localStorage.removeItem('teachers');
+                localStorage.removeItem('nextTeacherId');
+            } catch(e) { console.warn('Migration error:', e); }
+        }
+
+        // ══════════════════════════════════════════
+        //  Save to Firestore
+        // ══════════════════════════════════════════
+        async function saveTeachersData() {
+            setFbStatus('saving', '💾 جاري الحفظ على Firebase...');
+            try {
+                await setDoc(doc(db, 'teachers', 'data'), { teachers, nextTeacherId });
+                setFbStatus('connected', '🔥 Firebase — تم الحفظ ✔');
+            } catch(e) {
+                console.error('Save error:', e);
+                setFbStatus('error', '❌ خطأ في الحفظ — ' + e.message);
+            }
+        }
+
+        // ══════════════════════════════════════════
+        //  Realtime Listener
+        // ══════════════════════════════════════════
+        function startListener() {
+            onSnapshot(
+                doc(db, 'teachers', 'data'),
+                (snap) => {
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        teachers      = data.teachers      || defaultTeachers();
+                        nextTeacherId = data.nextTeacherId || teachers.length + 1;
+                    } else {
+                        teachers      = defaultTeachers();
+                        nextTeacherId = teachers.length + 1;
+                        saveTeachersData();
+                    }
+                    setFbStatus('connected', '🔥 Firebase متصل — البيانات محدّثة لحظياً');
+                    renderTeachers();
+                },
+                (err) => {
+                    console.error('Listener error:', err);
+                    setFbStatus('error', '❌ خطأ في الاتصال — تأكد من Firebase Rules');
+                }
+            );
+        }
+
+        // ══════════════════════════════════════════
+        //  State
+        // ══════════════════════════════════════════
+        let teachers      = [];
+        let nextTeacherId = 1;
+
+        const subjectNames = {
+            math:'رياضيات', arabic:'لغة عربية', english:'لغة إنجليزية',
+            science:'علوم', social:'دراسات اجتماعية', religion:'تربية دينية', computer:'حاسب آلي'
+        };
+
+        // ══════════════════════════════════════════
+        //  UI Functions
+        // ══════════════════════════════════════════
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+        function updateStats() {
+            const activeTeachers = teachers.filter(t => t.active).length;
+            const totalSalary    = teachers.reduce((sum, t) => sum + (t.active ? t.salary : 0), 0);
+            const allSubjects    = new Set();
+            teachers.forEach(t => t.subjects.forEach(s => allSubjects.add(s)));
+
+            document.getElementById('totalTeachers').textContent = teachers.length;
+            document.getElementById('activeTeachers').textContent = activeTeachers;
+            document.getElementById('totalSubjects').textContent  = allSubjects.size;
+            document.getElementById('totalSalary').textContent    = totalSalary.toLocaleString();
+        }
+
+        function renderTeachers() {
+            const grid = document.getElementById('teachersGrid');
+            grid.innerHTML = '';
+
+            if (teachers.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                        <p style="font-size: 18px; margin-bottom: 10px;">👨‍🏫 لا يوجد مدرسين مسجلين</p>
+                        <button class="btn" style="margin-top: 20px;" onclick="showAddTeacherModal()">
+                            ➕ إضافة مدرس جديد
+                        </button>
+                    </div>
+                `;
+                updateStats();
+                return;
+            }
+
+            teachers.forEach(teacher => {
+                const initials = teacher.name.replace('أ. ', '').split(' ').map(n => n[0]).join('');
+                const card = document.createElement('div');
+                card.className = 'teacher-card';
+                card.innerHTML = `
+                    <div class="teacher-header">
+                        <div class="teacher-avatar">${initials}</div>
+                        <div class="teacher-info">
+                            <h3>${teacher.name}</h3>
+                            <p>${teacher.subjects.length} ${teacher.subjects.length === 1 ? 'مادة' : 'مواد'}</p>
+                        </div>
+                    </div>
+                    <div class="teacher-details">
+                        <div class="detail-item">
+                            <span class="icon">📱</span>
+                            <span>${teacher.phone}</span>
+                        </div>
+                        ${teacher.email ? `
+                        <div class="detail-item">
+                            <span class="icon">📧</span>
+                            <span>${teacher.email}</span>
+                        </div>` : ''}
+                        <div class="detail-item">
+                            <span class="icon">💰</span>
+                            <span>${teacher.salary.toLocaleString()} جنيه شهرياً</span>
+                        </div>
+                        ${teacher.notes ? `
+                        <div class="detail-item">
+                            <span class="icon">📝</span>
+                            <span>${teacher.notes}</span>
+                        </div>` : ''}
+                    </div>
+                    <div class="subjects-tags">
+                        ${teacher.subjects.map(s => `<span class="subject-tag">${subjectNames[s]}</span>`).join('')}
+                    </div>
+                    <div class="teacher-actions">
+                        <button class="btn" onclick="editTeacher(${teacher.id})">✏️ تعديل</button>
+                        <button class="btn btn-danger" onclick="deleteTeacher(${teacher.id})">🗑️ حذف</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            updateStats();
+        }
+
+        function showAddTeacherModal() {
+            document.getElementById('teacherModalTitle').textContent = '➕ إضافة مدرس جديد';
+            document.getElementById('teacherForm').reset();
+            document.getElementById('teacherId').value = '';
+            document.getElementById('addTeacherModal').classList.add('active');
+        }
+
+        function editTeacher(teacherId) {
+            const teacher = teachers.find(t => t.id === teacherId);
+            if (!teacher) return;
+
+            document.getElementById('teacherModalTitle').textContent = '✏️ تعديل بيانات المدرس';
+            document.getElementById('teacherId').value   = teacher.id;
+            document.getElementById('teacherName').value = teacher.name;
+            document.getElementById('teacherPhone').value  = teacher.phone;
+            document.getElementById('teacherEmail').value  = teacher.email || '';
+            document.getElementById('teacherSalary').value = teacher.salary;
+            document.getElementById('teacherNotes').value  = teacher.notes || '';
+
+            document.querySelectorAll('.checkbox-group input[type="checkbox"]').forEach(cb => {
+                cb.checked = teacher.subjects.includes(cb.value);
+            });
+
+            document.getElementById('addTeacherModal').classList.add('active');
+        }
+
+        function saveTeacher(e) {
+            e.preventDefault();
+
+            const teacherId = document.getElementById('teacherId').value;
+            const selectedSubjects = [];
+            document.querySelectorAll('.checkbox-group input[type="checkbox"]:checked').forEach(cb => {
+                selectedSubjects.push(cb.value);
+            });
+
+            if (selectedSubjects.length === 0) {
+                showAlert('يرجى اختيار مادة واحدة على الأقل', 'danger');
+                return;
+            }
+
+            const teacherData = {
+                id:       teacherId ? parseInt(teacherId) : nextTeacherId++,
+                name:     document.getElementById('teacherName').value,
+                phone:    document.getElementById('teacherPhone').value,
+                email:    document.getElementById('teacherEmail').value,
+                salary:   parseInt(document.getElementById('teacherSalary').value),
+                subjects: selectedSubjects,
+                notes:    document.getElementById('teacherNotes').value,
+                active:   true
+            };
+
+            if (teacherId) {
+                const index = teachers.findIndex(t => t.id === parseInt(teacherId));
+                teachers[index] = teacherData;
+                showAlert('تم تعديل بيانات المدرس بنجاح! ✓');
+            } else {
+                teachers.push(teacherData);
+                showAlert('تم إضافة المدرس بنجاح! ✓');
+            }
+
+            saveTeachersData();
+            closeModal('addTeacherModal');
+            renderTeachers();
+        }
+
+        function deleteTeacher(teacherId) {
+            if (confirm('هل أنت متأكد من حذف هذا المدرس؟')) {
+                teachers = teachers.filter(t => t.id !== teacherId);
+                saveTeachersData();
+                showAlert('تم حذف المدرس بنجاح!', 'success');
+                renderTeachers();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        };
+
+        // ══════════════════════════════════════════
+        //  تصدير الدوال للـ window عشان onclick يشتغل
+        // ══════════════════════════════════════════
+        window.showAddTeacherModal = showAddTeacherModal;
+        window.editTeacher         = editTeacher;
+        window.saveTeacher         = saveTeacher;
+        window.deleteTeacher       = deleteTeacher;
+        window.closeModal          = closeModal;
+
+        // ══════════════════════════════════════════
+        //  Init
+        // ══════════════════════════════════════════
+        setFbStatus('connecting', '🔌 جاري الاتصال بـ Firebase...');
+        migrateIfNeeded().then(() => startListener());
+
+    </script>
+</body>
+</html>

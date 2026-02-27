@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المالية ودفع الاشتراكات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box.success .number {
+            color: #28a745;
+        }
+
+        .stat-box.warning .number {
+            color: #ffc107;
+        }
+
+        .stat-box.danger .number {
+            color: #dc3545;
+        }
+
+        .stat-box .label {
+            color: #666;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .students-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .students-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+
+        .students-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .students-table th,
+        .students-table td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .students-table th {
+            font-weight: bold;
+        }
+
+        .students-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-badge.paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.pay {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-btn.pay:hover {
+            background: #218838;
+        }
+
+        .action-btn.view {
+            background: #667eea;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .action-btn.view:hover {
+            background: #5568d3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .payment-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .payment-summary .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .payment-summary .item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .payment-history {
+            margin-top: 20px;
+        }
+
+        .payment-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-right: 4px solid #28a745;
+        }
+
+        .payment-item .date {
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* ── Firebase Status Bar ── */
+        .firebase-bar {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 18px; border-radius: 10px;
+            margin-bottom: 20px; font-size: 13px; font-weight: bold; transition: all .3s;
+        }
+        .firebase-bar.connected  { background:#d4edda; color:#155724; border:2px solid #28a745; }
+        .firebase-bar.error      { background:#f8d7da; color:#721c24; border:2px solid #dc3545; }
+        .firebase-bar.connecting { background:#fff3cd; color:#856404; border:2px solid #ffc107; }
+        .firebase-bar.saving     { background:#e3f2fd; color:#1565c0; border:2px solid #2196f3; }
+        .firebase-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+        .firebase-dot.connected  { background:#28a745; box-shadow:0 0 8px #28a745; animation:fbBlink 2s infinite; }
+        .firebase-dot.error      { background:#dc3545; }
+        .firebase-dot.connecting { background:#ffc107; animation:fbBlink .6s infinite; }
+        .firebase-dot.saving     { background:#2196f3; animation:fbBlink .4s infinite; }
+        @keyframes fbBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>💰 المالية ودفع الاشتراكات</h1>
+                <p style="color: #999; margin-top: 5px;">إدارة المدفوعات والاشتراكات</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="index.html" class="btn btn-warning">🏠 الرئيسية</a>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Firebase Status Bar -->
+        <div class="firebase-bar connecting" id="firebaseStatusBar">
+            <div class="firebase-dot connecting" id="firebaseDot"></div>
+            <span id="firebaseMsg">🔌 جاري الاتصال بـ Firebase...</span>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-box success">
+                <div class="number" id="totalRevenue">0</div>
+                <div class="label">إجمالي الإيرادات (جنيه)</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="totalStudents">0</div>
+                <div class="label">إجمالي الطلاب</div>
+            </div>
+            <div class="stat-box success">
+                <div class="number" id="paidStudents">0</div>
+                <div class="label">طالب مدفوع</div>
+            </div>
+            <div class="stat-box warning">
+                <div class="number" id="pendingStudents">0</div>
+                <div class="label">في انتظار الدفع</div>
+            </div>
+            <div class="stat-box danger">
+                <div class="number" id="overdueStudents">0</div>
+                <div class="label">متأخرين</div>
+            </div>
+        </div>
+
+        <!-- Students List -->
+        <div class="students-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📋 قائمة الطلاب والاشتراكات</h2>
+                <button class="btn" onclick="showSetPricesModal()">💰 تحديد أسعار الاشتراكات</button>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 البحث عن طالب..." onkeyup="filterStudents()">
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>اسم الطالب</th>
+                            <th>الفصل</th>
+                            <th>سعر الاشتراك</th>
+                            <th>المدفوع</th>
+                            <th>المتبقي</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 تسجيل دفعة</h2>
+                <button class="close-btn" onclick="closeModal('paymentModal')">&times;</button>
+            </div>
+            
+            <div class="payment-summary">
+                <div class="item">
+                    <span>اسم الطالب:</span>
+                    <span id="paymentStudentName">-</span>
+                </div>
+                <div class="item">
+                    <span>الفصل:</span>
+                    <span id="paymentStudentClass">-</span>
+                </div>
+                <div class="item">
+                    <span>سعر الاشتراك:</span>
+                    <span id="paymentSubscriptionPrice">0 جنيه</span>
+                </div>
+                <div class="item">
+                    <span>المدفوع سابقاً:</span>
+                    <span id="paymentPaidAmount">0 جنيه</span>
+                </div>
+                <div class="item">
+                    <span>المتبقي:</span>
+                    <span id="paymentRemainingAmount">0 جنيه</span>
+                </div>
+            </div>
+
+            <form onsubmit="processPayment(event)">
+                <input type="hidden" id="paymentStudentId">
+                <div class="form-group">
+                    <label>المبلغ المدفوع</label>
+                    <input type="number" id="paymentAmount" placeholder="أدخل المبلغ" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>طريقة الدفع</label>
+                    <select id="paymentMethod" required>
+                        <option value="">اختر طريقة الدفع</option>
+                        <option value="cash">نقدي</option>
+                        <option value="card">بطاقة</option>
+                        <option value="transfer">تحويل بنكي</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea id="paymentNotes" placeholder="ملاحظات إضافية (اختياري)" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-success" style="flex: 1;">✓ تأكيد الدفع</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal('paymentModal')">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Details Modal -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 تفاصيل الطالب</h2>
+                <button class="close-btn" onclick="closeModal('detailsModal')">&times;</button>
+            </div>
+            
+            <div id="studentDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Set Prices Modal -->
+    <div class="modal" id="setPricesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 تحديد أسعار الاشتراكات</h2>
+                <button class="close-btn" onclick="closeModal('setPricesModal')">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>تطبيق سعر موحد على الجميع (اختياري)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="bulkPrice" placeholder="أدخل السعر الموحد" min="0">
+                        <button class="btn btn-success" onclick="applyBulkPrice()">✓ تطبيق</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pricesList"></div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" style="width: 100%;" onclick="savePrices()">✓ حفظ الأسعار</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZCGljrXbTP38-MZwzsxOZ8HK34Fykk8o",
+            authDomain: "senter-4e169.firebaseapp.com",
+            projectId: "senter-4e169",
+            storageBucket: "senter-4e169.firebasestorage.app",
+            messagingSenderId: "235178743750",
+            appId: "1:235178743750:web:e4419cfea51a404f2e44c7"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db  = getFirestore(app);
+
+        const DEFAULT_PRICE = 500;
+
+        // ── Status Bar ──────────────────────────
+        function setFbStatus(state, msg) {
+            const bar = document.getElementById('firebaseStatusBar');
+            const dot = document.getElementById('firebaseDot');
+            const txt = document.getElementById('firebaseMsg');
+            if (!bar) return;
+            bar.className = 'firebase-bar ' + state;
+            dot.className = 'firebase-dot ' + state;
+            txt.textContent = msg;
+        }
+
+        // ── State ───────────────────────────────
+        let students           = [];
+        let paymentsData       = {};   // { id: { paid, subscriptionPrice, history[] } }
+        let attendanceSessions = [];
+
+        // ── Save Payments ───────────────────────
+        async function savePayments() {
+            setFbStatus('saving', '💾 جاري الحفظ على Firebase...');
+            try {
+                await setDoc(doc(db, 'finance', 'payments'), { data: paymentsData });
+                setFbStatus('connected', '🔥 Firebase — تم الحفظ ✔');
+            } catch(e) {
+                setFbStatus('error', '❌ خطأ في الحفظ — ' + e.message);
+            }
+        }
+
+        // ── Build Students from Sessions + Payments ─
+        function buildStudentsList() {
+            const map = new Map();
+            attendanceSessions.forEach(session => {
+                (session.students || []).forEach(s => {
+                    if (!map.has(s.id)) {
+                        const pd = paymentsData[s.id] || {};
+                        map.set(s.id, {
+                            id: s.id,
+                            name: s.name,
+                            class: session.class,
+                            subscriptionPrice: pd.subscriptionPrice ?? DEFAULT_PRICE,
+                            paid: pd.paid || 0,
+                            paymentHistory: pd.history || []
+                        });
+                    }
+                });
+            });
+            students = Array.from(map.values());
+        }
+
+        // ── Migration localStorage → Firestore ──
+        async function migrateIfNeeded() {
+            const localPayments = localStorage.getItem('studentPayments');
+            const localPrices   = localStorage.getItem('subscriptionPrices');
+            if (!localPayments && !localPrices) return;
+            try {
+                const snap = await getDoc(doc(db, 'finance', 'payments'));
+                if (!snap.exists()) {
+                    const payments = localPayments ? JSON.parse(localPayments) : {};
+                    const prices   = localPrices   ? JSON.parse(localPrices)   : {};
+                    const merged   = {};
+                    new Set([...Object.keys(payments), ...Object.keys(prices)]).forEach(id => {
+                        merged[id] = {
+                            paid: payments[id]?.paid || 0,
+                            history: payments[id]?.history || [],
+                            subscriptionPrice: prices[id] || DEFAULT_PRICE
+                        };
+                    });
+                    await setDoc(doc(db, 'finance', 'payments'), { data: merged });
+                    console.log('✅ تم نقل المالية لـ Firebase');
+                }
+                localStorage.removeItem('studentPayments');
+                localStorage.removeItem('subscriptionPrices');
+            } catch(e) { console.warn('Migration error:', e); }
+        }
+
+        // ── Realtime Listeners ──────────────────
+        function startListeners() {
+            // Listener 1: بيانات الحصص (مصدر الطلاب)
+            onSnapshot(doc(db, 'dashboard', 'attendanceSessions'), snap => {
+                attendanceSessions = snap.exists() ? (snap.data().data || []) : [];
+                buildStudentsList();
+                renderStudents();
+                setFbStatus('connected', '🔥 Firebase متصل — البيانات محدّثة لحظياً');
+            }, err => {
+                console.error(err);
+                setFbStatus('error', '❌ خطأ في الاتصال — تأكد من Firebase Rules');
+            });
+
+            // Listener 2: بيانات الدفعات
+            onSnapshot(doc(db, 'finance', 'payments'), snap => {
+                paymentsData = snap.exists() ? (snap.data().data || {}) : {};
+                buildStudentsList();
+                renderStudents();
+            }, err => console.error('Payments listener:', err));
+        }
+
+        // ── UI Helpers ──────────────────────────
+        function showAlert(message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `alert alert-${type}`;
+            div.textContent = message;
+            const c = document.getElementById('alertContainer');
+            c.innerHTML = '';
+            c.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        function getPaymentStatus(s) {
+            const r = s.subscriptionPrice - s.paid;
+            if (r <= 0) return 'paid';
+            if (s.paid > 0) return 'pending';
+            return 'overdue';
+        }
+
+        function updateStats() {
+            const total    = students.reduce((sum, s) => sum + s.paid, 0);
+            const paid     = students.filter(s => s.paid >= s.subscriptionPrice).length;
+            const pending  = students.filter(s => s.paid > 0 && s.paid < s.subscriptionPrice).length;
+            const overdue  = students.filter(s => s.paid === 0).length;
+            document.getElementById('totalRevenue').textContent    = total.toLocaleString();
+            document.getElementById('totalStudents').textContent   = students.length;
+            document.getElementById('paidStudents').textContent    = paid;
+            document.getElementById('pendingStudents').textContent = pending;
+            document.getElementById('overdueStudents').textContent = overdue;
+        }
+
+        function renderStudents() {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#666;">
+                    <p style="font-size:18px;margin-bottom:10px;">👥 لا يوجد طلاب مسجلين</p>
+                    <p>يرجى إضافة طلاب في صفحة الحضور والغياب أولاً</p></td></tr>`;
+                updateStats(); return;
+            }
+            students.forEach(s => {
+                const rem    = s.subscriptionPrice - s.paid;
+                const status = getPaymentStatus(s);
+                const stText = status === 'paid' ? 'مدفوع' : status === 'pending' ? 'جزئي' : 'لم يدفع';
+                const row    = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${s.name}</td>
+                    <td>${s.class}</td>
+                    <td>${s.subscriptionPrice} جنيه</td>
+                    <td>${s.paid} جنيه</td>
+                    <td>${rem > 0 ? rem : 0} جنيه</td>
+                    <td><span class="status-badge ${status}">${stText}</span></td>
+                    <td>
+                        ${rem > 0 ? `<button class="action-btn pay" onclick="showPaymentModal(${s.id})">💰 دفع</button>` : ''}
+                        <button class="action-btn view" onclick="showStudentDetails(${s.id})">👁️ عرض</button>
+                    </td>`;
+                tbody.appendChild(row);
+            });
+            updateStats();
+        }
+
+        function filterStudents() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#studentsTableBody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+            });
+        }
+
+        function showPaymentModal(studentId) {
+            const s = students.find(x => x.id === studentId);
+            if (!s) return;
+            const rem = s.subscriptionPrice - s.paid;
+            document.getElementById('paymentStudentId').value               = s.id;
+            document.getElementById('paymentStudentName').textContent       = s.name;
+            document.getElementById('paymentStudentClass').textContent      = s.class;
+            document.getElementById('paymentSubscriptionPrice').textContent = s.subscriptionPrice + ' جنيه';
+            document.getElementById('paymentPaidAmount').textContent        = s.paid + ' جنيه';
+            document.getElementById('paymentRemainingAmount').textContent   = rem + ' جنيه';
+            document.getElementById('paymentAmount').value = rem;
+            document.getElementById('paymentAmount').max   = rem;
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function processPayment(e) {
+            e.preventDefault();
+            const id     = parseInt(document.getElementById('paymentStudentId').value);
+            const amount = parseInt(document.getElementById('paymentAmount').value);
+            const method = document.getElementById('paymentMethod').value;
+            const notes  = document.getElementById('paymentNotes').value;
+            const s      = students.find(x => x.id === id);
+            if (!s) return;
+            if (amount > (s.subscriptionPrice - s.paid)) {
+                showAlert('المبلغ المدفوع أكبر من المتبقي!', 'danger'); return;
+            }
+            if (!paymentsData[id]) paymentsData[id] = { paid: 0, history: [], subscriptionPrice: s.subscriptionPrice };
+            paymentsData[id].paid = (paymentsData[id].paid || 0) + amount;
+            paymentsData[id].history.push({ date: new Date().toISOString(), amount, method, notes });
+            savePayments();
+            showAlert(`تم تسجيل دفعة بمبلغ ${amount} جنيه بنجاح! ✓`);
+            closeModal('paymentModal');
+            buildStudentsList();
+            renderStudents();
+        }
+
+        function showStudentDetails(studentId) {
+            const s = students.find(x => x.id === studentId);
+            if (!s) return;
+            const rem = s.subscriptionPrice - s.paid;
+            let content = `
+                <div class="payment-summary">
+                    <div class="item"><span>اسم الطالب:</span><span>${s.name}</span></div>
+                    <div class="item"><span>الفصل:</span><span>${s.class}</span></div>
+                    <div class="item"><span>سعر الاشتراك:</span><span>${s.subscriptionPrice} جنيه</span></div>
+                    <div class="item"><span>المدفوع:</span><span>${s.paid} جنيه</span></div>
+                    <div class="item"><span>المتبقي:</span><span>${rem > 0 ? rem : 0} جنيه</span></div>
+                </div>
+                <div class="payment-history">
+                    <h3 style="color:#333;margin-bottom:15px;">💳 سجل الدفعات</h3>`;
+            if (s.paymentHistory && s.paymentHistory.length > 0) {
+                s.paymentHistory.forEach(p => {
+                    const date = new Date(p.date).toLocaleDateString('ar-EG');
+                    const mt   = p.method === 'cash' ? 'نقدي' : p.method === 'card' ? 'بطاقة' : 'تحويل بنكي';
+                    content += `<div class="payment-item">
+                        <div><strong>المبلغ:</strong> ${p.amount} جنيه</div>
+                        <div><strong>الطريقة:</strong> ${mt}</div>
+                        ${p.notes ? `<div><strong>ملاحظات:</strong> ${p.notes}</div>` : ''}
+                        <div class="date">📅 ${date}</div></div>`;
+                });
+            } else {
+                content += '<p style="text-align:center;color:#999;padding:20px;">لا توجد دفعات مسجلة</p>';
+            }
+            content += '</div>';
+            document.getElementById('studentDetailsContent').innerHTML = content;
+            document.getElementById('detailsModal').classList.add('active');
+        }
+
+        function showSetPricesModal() {
+            let html = '<div style="max-height:400px;overflow-y:auto;">';
+            students.forEach(s => {
+                html += `<div class="form-group">
+                    <label>${s.name} (${s.class})</label>
+                    <input type="number" id="price_${s.id}" value="${s.subscriptionPrice}" min="0">
+                </div>`;
+            });
+            html += '</div>';
+            document.getElementById('pricesList').innerHTML = html;
+            document.getElementById('setPricesModal').classList.add('active');
+        }
+
+        function applyBulkPrice() {
+            const p = document.getElementById('bulkPrice').value;
+            if (!p || p <= 0) { showAlert('يرجى إدخال سعر صحيح!', 'danger'); return; }
+            students.forEach(s => {
+                const inp = document.getElementById(`price_${s.id}`);
+                if (inp) inp.value = p;
+            });
+            showAlert('تم تطبيق السعر الموحد على جميع الطلاب!');
+        }
+
+        function savePrices() {
+            let hasError = false;
+            students.forEach(s => {
+                const price = parseInt(document.getElementById(`price_${s.id}`)?.value);
+                if (!price || price < 0) { hasError = true; return; }
+                if (!paymentsData[s.id]) paymentsData[s.id] = { paid: 0, history: [] };
+                paymentsData[s.id].subscriptionPrice = price;
+            });
+            if (hasError) { showAlert('يرجى إدخال أسعار صحيحة لجميع الطلاب!', 'danger'); return; }
+            savePayments();
+            showAlert('تم حفظ أسعار الاشتراكات بنجاح! ✓');
+            closeModal('setPricesModal');
+            buildStudentsList();
+            renderStudents();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) event.target.classList.remove('active');
+        };
+
+        // ── تصدير الدوال للـ window ─────────────
+        window.showPaymentModal   = showPaymentModal;
+        window.processPayment     = processPayment;
+        window.showStudentDetails = showStudentDetails;
+        window.showSetPricesModal = showSetPricesModal;
+        window.applyBulkPrice     = applyBulkPrice;
+        window.savePrices         = savePrices;
+        window.filterStudents     = filterStudents;
+        window.closeModal         = closeModal;
+
+        // ── Init ────────────────────────────────
+        setFbStatus('connecting', '🔌 جاري الاتصال بـ Firebase...');
+        migrateIfNeeded().then(() => startListeners());
+
+    </script>
+</body>
+</html>

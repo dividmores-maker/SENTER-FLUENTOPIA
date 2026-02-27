@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .change {
+            font-size: 12px;
+            color: #27ae60;
+        }
+
+        .stat-card.warning .number {
+            color: #e74c3c;
+        }
+
+        .stat-card.success .number {
+            color: #27ae60;
+        }
+
+        .stat-card.info .number {
+            color: #3498db;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .progress-item {
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.blue {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .progress-fill.green {
+            background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .progress-fill.orange {
+            background: linear-gradient(90deg, #f39c12 0%, #f1c40f 100%);
+        }
+
+        .progress-fill.red {
+            background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .recent-activities {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .recent-activities h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .activity-item {
+            padding: 15px;
+            border-right: 4px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .activity-item.success {
+            border-right-color: #27ae60;
+        }
+
+        .activity-item.warning {
+            border-right-color: #f39c12;
+        }
+
+        .activity-item.danger {
+            border-right-color: #e74c3c;
+        }
+
+        .activity-time {
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .quick-stat .icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .quick-stat .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .quick-stat .label {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .attendance-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            padding: 20px 0;
+        }
+
+        .bar {
+            flex: 1;
+            max-width: 60px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            margin: 0 5px;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.05);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .sessions-summary {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .sessions-summary h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .session-item.completed {
+            background: #d4edda;
+        }
+
+        .session-details {
+            flex: 1;
+        }
+
+        .session-details h3 {
+            color: #333;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .session-details p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .session-status {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .session-status.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .session-status.pending {
+            background: #ffc107;
+            color: #333;
+        }
+
+        /* ── Firebase Status Bar ── */
+        .firebase-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all .3s;
+        }
+        .firebase-bar.connected    { background:#d4edda; color:#155724; border:2px solid #28a745; }
+        .firebase-bar.error        { background:#f8d7da; color:#721c24; border:2px solid #dc3545; }
+        .firebase-bar.connecting   { background:#fff3cd; color:#856404; border:2px solid #ffc107; }
+        .firebase-dot {
+            width:12px; height:12px; border-radius:50%; flex-shrink:0;
+        }
+        .firebase-dot.connected    { background:#28a745; box-shadow:0 0 8px #28a745; animation:fbBlink 2s infinite; }
+        .firebase-dot.error        { background:#dc3545; }
+        .firebase-dot.connecting   { background:#ffc107; animation:fbBlink .6s infinite; }
+        @keyframes fbBlink { 0%,100%{opacity:1} 50%{opacity:.3} }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📊 لوحة التحكم الرئيسية</h1>
+                <p>نظرة شاملة على أداء السنتر</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="teachers.html" class="btn">👨‍🏫 المدرسين</a>
+                <a href="attendance.html" class="btn">✅ الحضور والغياب</a>
+                <a href="index.html" class="btn btn-warning">🏠 الرئيسية</a>
+            </div>
+        </div>
+
+        <!-- Firebase Status Bar -->
+        <div class="firebase-bar connecting" id="firebaseStatusBar">
+            <div class="firebase-dot connecting" id="firebaseDot"></div>
+            <span id="firebaseMsg">🔌 جاري الاتصال بـ Firebase...</span>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>إجمالي الطلاب</h3>
+                <div class="number" id="totalStudents">0</div>
+                <div class="change" id="studentsChange">في جميع الحصص</div>
+            </div>
+            <div class="stat-card success">
+                <h3>المدرسين النشطين</h3>
+                <div class="number" id="activeTeachers">0</div>
+                <div class="change" id="teachersChange">من إجمالي المدرسين</div>
+            </div>
+            <div class="stat-card info">
+                <h3>إجمالي الحصص</h3>
+                <div class="number" id="totalSessions">0</div>
+                <div class="change" id="totalSessionsChange">حصص متاحة</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>متوسط الحضور</h3>
+                <div class="number" id="avgAttendance">0%</div>
+                <div class="change" id="attendanceChange">نسبة الحضور العامة</div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="quick-stat">
+                <div class="icon">✅</div>
+                <div class="value" id="totalPresent">0</div>
+                <div class="label">طالب حاضر</div>
+            </div>
+            <div class="quick-stat">
+                <div class="icon">❌</div>
+                <div class="value" id="totalAbsent">0</div>
+                <div class="label">طالب غائب</div>
+            </div>
+            <div class="quick-stat">
+                <div class="icon">⏳</div>
+                <div class="value" id="pendingSessions">0</div>
+                <div class="label">حصص قيد الانتظار</div>
+            </div>
+            <div class="quick-stat">
+                <div class="icon">📚</div>
+                <div class="value" id="uniqueStudents">0</div>
+                <div class="label">طالب فريد</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="chart-row">
+            <!-- Attendance by Session -->
+            <div class="chart-card">
+                <h2>📈 نسبة الحضور حسب الحصص</h2>
+                <div id="attendanceBySession"></div>
+            </div>
+
+            <!-- Sessions Progress -->
+            <div class="chart-card">
+                <h2>📊 تقدم تسجيل الحصص</h2>
+                <div id="sessionsProgress"></div>
+            </div>
+        </div>
+
+        <!-- Sessions Summary -->
+        <div class="sessions-summary">
+            <h2>📚 ملخص الحصص</h2>
+            <div id="sessionsSummaryList"></div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="recent-activities">
+            <h2>🔔 آخر الأنشطة</h2>
+            <div id="recentActivitiesList"></div>
+        </div>
+
+        <!-- Teachers Section -->
+        <div class="recent-activities" style="margin-top: 25px;">
+            <h2>👨‍🏫 المدرسين النشطين</h2>
+            <div id="teachersSection"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getFirestore, collection, onSnapshot, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        // ══════════════════════════════════════════
+        //  Firebase Config
+        // ══════════════════════════════════════════
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZCGljrXbTP38-MZwzsxOZ8HK34Fykk8o",
+            authDomain: "senter-4e169.firebaseapp.com",
+            projectId: "senter-4e169",
+            storageBucket: "senter-4e169.firebasestorage.app",
+            messagingSenderId: "235178743750",
+            appId: "1:235178743750:web:e4419cfea51a404f2e44c7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db  = getFirestore(app);
+
+        // ══════════════════════════════════════════
+        //  Firebase Status Indicator
+        // ══════════════════════════════════════════
+        function setFirebaseStatus(state, msg) {
+            const bar = document.getElementById('firebaseStatusBar');
+            const dot = document.getElementById('firebaseDot');
+            const txt = document.getElementById('firebaseMsg');
+            if (!bar) return;
+            bar.className = 'firebase-bar ' + state;
+            dot.className = 'firebase-dot ' + state;
+            txt.textContent = msg;
+        }
+
+        // ══════════════════════════════════════════
+        //  State
+        // ══════════════════════════════════════════
+        let sessions = [];
+        let teachers = [];
+
+        // ══════════════════════════════════════════
+        //  Helpers: sync localStorage → Firestore (one-time migration)
+        // ══════════════════════════════════════════
+        async function migrateLocalStorageToFirestore() {
+            // Sessions
+            const localSessions = localStorage.getItem('attendanceSessions');
+            if (localSessions) {
+                try {
+                    const parsed = JSON.parse(localSessions);
+                    await setDoc(doc(db, 'dashboard', 'attendanceSessions'), { data: parsed });
+                    localStorage.removeItem('attendanceSessions');
+                    console.log('✅ تم نقل بيانات الحصص إلى Firebase');
+                } catch(e) { console.warn('migration sessions failed', e); }
+            }
+            // Teachers
+            const localTeachers = localStorage.getItem('teachers');
+            if (localTeachers) {
+                try {
+                    const parsed = JSON.parse(localTeachers);
+                    await setDoc(doc(db, 'dashboard', 'teachers'), { data: parsed });
+                    localStorage.removeItem('teachers');
+                    console.log('✅ تم نقل بيانات المدرسين إلى Firebase');
+                } catch(e) { console.warn('migration teachers failed', e); }
+            }
+        }
+
+        // ══════════════════════════════════════════
+        //  Real-time listeners
+        // ══════════════════════════════════════════
+        function listenToSessions() {
+            return onSnapshot(
+                doc(db, 'dashboard', 'attendanceSessions'),
+                (snap) => {
+                    if (snap.exists()) {
+                        sessions = snap.data().data || [];
+                    } else {
+                        sessions = getDefaultSessions();
+                    }
+                    setFirebaseStatus('connected', '🔥 Firebase متصل — البيانات محدّثة');
+                    updateDashboard();
+                },
+                (err) => {
+                    console.error('sessions listener error', err);
+                    setFirebaseStatus('error', '❌ خطأ في الاتصال بـ Firebase');
+                    // Fallback to localStorage
+                    const local = localStorage.getItem('attendanceSessions');
+                    sessions = local ? JSON.parse(local) : getDefaultSessions();
+                    updateDashboard();
+                }
+            );
+        }
+
+        function listenToTeachers() {
+            return onSnapshot(
+                doc(db, 'dashboard', 'teachers'),
+                (snap) => {
+                    if (snap.exists()) {
+                        teachers = snap.data().data || [];
+                    } else {
+                        teachers = getDefaultTeachers();
+                    }
+                    updateDashboard();
+                },
+                (err) => {
+                    console.error('teachers listener error', err);
+                    const local = localStorage.getItem('teachers');
+                    teachers = local ? JSON.parse(local) : getDefaultTeachers();
+                    updateDashboard();
+                }
+            );
+        }
+
+        // ══════════════════════════════════════════
+        //  Default fallback data
+        // ══════════════════════════════════════════
+        function getDefaultSessions() {
+            return [
+                { id: 1, subject: 'رياضيات', class: 'الأول الابتدائي', teacher: 'أ. محمد أحمد', day: 'السبت', time: '2:00 - 3:30 ظهراً', room: 'A1',
+                  students: [{ id:1, name:'أحمد محمد', status:'present'}, {id:2, name:'محمد علي', status:'present'}, {id:3, name:'سارة حسن', status:'absent'}, {id:4, name:'فاطمة أحمد', status:'present'}, {id:5, name:'عمر خالد', status:'present'}], completed: true },
+                { id: 2, subject: 'لغة عربية', class: 'الثاني الابتدائي', teacher: 'أ. فاطمة علي', day: 'الأحد', time: '3:45 - 5:15 مساءً', room: 'A2',
+                  students: [{id:6,name:'نور الدين',status:'present'},{id:7,name:'ياسمين حسن',status:'present'},{id:8,name:'كريم أحمد',status:'present'}], completed: true },
+                { id: 3, subject: 'علوم', class: 'الثالث الإعدادي', teacher: 'أ. خالد محمود', day: 'الاثنين', time: '5:30 - 7:00 مساءً', room: 'B1',
+                  students: [{id:9,name:'علي محمود',status:null},{id:10,name:'منى إبراهيم',status:null},{id:11,name:'حسن أحمد',status:null},{id:12,name:'ليلى محمد',status:null}], completed: false }
+            ];
+        }
+
+        function getDefaultTeachers() {
+            return [
+                { id:1, name:'أ. محمد أحمد', phone:'01012345678', email:'mohamed@example.com', salary:5000, subjects:['math','science'], notes:'مدرس متميز', active:true },
+                { id:2, name:'أ. فاطمة علي', phone:'01098765432', email:'fatma@example.com', salary:4500, subjects:['arabic'], notes:'', active:true },
+                { id:3, name:'أ. خالد محمود', phone:'01055556666', email:'khaled@example.com', salary:5500, subjects:['science'], notes:'', active:true }
+            ];
+        }
+
+        // ══════════════════════════════════════════
+        //  Init
+        // ══════════════════════════════════════════
+        setFirebaseStatus('connecting', '🔌 جاري الاتصال بـ Firebase...');
+        migrateLocalStorageToFirestore().then(() => {
+            listenToSessions();
+            listenToTeachers();
+        });
+
+        // Expose updateDashboard to module scope below
+
+        // (No more setInterval reload — Firebase onSnapshot handles real-time updates)
+
+        // ══════════════════════════════════════════
+        //  Dashboard Logic (inside module to access sessions/teachers)
+        // ══════════════════════════════════════════
+
+        function calculateStats() {
+            const stats = {
+                totalStudents: 0,
+                totalSessions: sessions.length,
+                completedSessions: 0,
+                totalPresent: 0,
+                totalAbsent: 0,
+                pendingSessions: 0,
+                uniqueStudents: new Set(),
+                totalTeachers: teachers.length,
+                activeTeachers: teachers.filter(t => t.active).length
+            };
+
+            sessions.forEach(session => {
+                stats.totalStudents += session.students.length;
+
+                if (session.completed) {
+                    stats.completedSessions++;
+                } else {
+                    stats.pendingSessions++;
+                }
+
+                session.students.forEach(student => {
+                    stats.uniqueStudents.add(student.name);
+                    if (student.status === 'present') stats.totalPresent++;
+                    if (student.status === 'absent') stats.totalAbsent++;
+                });
+            });
+
+            const avgAttendance = stats.totalStudents > 0
+                ? Math.round((stats.totalPresent / (stats.totalPresent + stats.totalAbsent)) * 100)
+                : 0;
+
+            return { ...stats, avgAttendance, uniqueStudents: stats.uniqueStudents.size };
+        }
+
+        function updateDashboard() {
+            const stats = calculateStats();
+
+            document.getElementById('totalStudents').textContent = stats.totalStudents;
+            document.getElementById('studentsChange').textContent = `في ${stats.totalSessions} حصص`;
+            document.getElementById('activeTeachers').textContent = stats.activeTeachers;
+            document.getElementById('teachersChange').textContent = `من ${stats.totalTeachers} مدرس`;
+            document.getElementById('totalSessions').textContent = stats.totalSessions;
+            document.getElementById('totalSessionsChange').textContent = `${stats.pendingSessions} قيد الانتظار`;
+            document.getElementById('avgAttendance').textContent = stats.avgAttendance + '%';
+            document.getElementById('attendanceChange').textContent =
+                `${stats.totalPresent} حاضر من ${stats.totalPresent + stats.totalAbsent}`;
+            document.getElementById('totalPresent').textContent = stats.totalPresent;
+            document.getElementById('totalAbsent').textContent = stats.totalAbsent;
+            document.getElementById('pendingSessions').textContent = stats.pendingSessions;
+            document.getElementById('uniqueStudents').textContent = stats.uniqueStudents;
+
+            renderAttendanceBySession();
+            renderSessionsProgress();
+            renderSessionsSummary();
+            renderRecentActivities();
+            renderTeachersSection();
+        }
+
+        function renderAttendanceBySession() {
+            const container = document.getElementById('attendanceBySession');
+            container.innerHTML = '';
+
+            sessions.forEach(session => {
+                if (!session.completed) return;
+                const present = session.students.filter(s => s.status === 'present').length;
+                const total = session.students.length;
+                const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+
+                const item = document.createElement('div');
+                item.className = 'progress-item';
+                item.innerHTML = `
+                    <div class="progress-header">
+                        <span>${session.subject} - ${session.class}</span>
+                        <span>${percentage}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${percentage >= 90 ? 'green' : percentage >= 70 ? 'blue' : 'orange'}"
+                             style="width: ${percentage}%;"></div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            if (sessions.filter(s => s.completed).length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">لا توجد حصص مسجلة بعد</p>';
+            }
+        }
+
+        function renderSessionsProgress() {
+            const container = document.getElementById('sessionsProgress');
+            const stats = calculateStats();
+            const completedPercentage = stats.totalSessions > 0
+                ? Math.round((stats.completedSessions / stats.totalSessions) * 100)
+                : 0;
+
+            container.innerHTML = `
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span>الحصص المكتملة</span>
+                        <span>${stats.completedSessions} / ${stats.totalSessions}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill green" style="width: ${completedPercentage}%;"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #28a745;">${stats.completedSessions}</div>
+                            <div style="font-size: 13px; color: #666;">مكتملة</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #ffc107;">${stats.pendingSessions}</div>
+                            <div style="font-size: 13px; color: #666;">قيد الانتظار</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #667eea;">${completedPercentage}%</div>
+                            <div style="font-size: 13px; color: #666;">نسبة الإنجاز</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSessionsSummary() {
+            const container = document.getElementById('sessionsSummaryList');
+            container.innerHTML = '';
+
+            sessions.forEach(session => {
+                const present = session.students.filter(s => s.status === 'present').length;
+                const absent  = session.students.filter(s => s.status === 'absent').length;
+
+                const item = document.createElement('div');
+                item.className = `session-item ${session.completed ? 'completed' : ''}`;
+                item.innerHTML = `
+                    <div class="session-details">
+                        <h3>${session.subject} - ${session.class}</h3>
+                        <p>👨‍🏫 ${session.teacher} • 📅 ${session.day} ${session.time} • 🏫 قاعة ${session.room}</p>
+                        ${session.completed
+                            ? `<p style="margin-top: 5px;">✅ ${present} حاضر • ❌ ${absent} غائب • 👥 ${session.students.length} طالب</p>`
+                            : `<p style="margin-top: 5px;">👥 ${session.students.length} طالب</p>`}
+                    </div>
+                    <span class="session-status ${session.completed ? 'completed' : 'pending'}">
+                        ${session.completed ? '✓ مكتملة' : '⏳ قيد الانتظار'}
+                    </span>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderRecentActivities() {
+            const container = document.getElementById('recentActivitiesList');
+            container.innerHTML = '';
+
+            const activities = [];
+            sessions.forEach(session => {
+                if (session.completed) {
+                    const present = session.students.filter(s => s.status === 'present').length;
+                    const absent  = session.students.filter(s => s.status === 'absent').length;
+                    activities.push({
+                        type: 'success',
+                        title: 'تسجيل حضور حصة',
+                        description: `تم تسجيل حضور حصة ${session.subject} - ${session.class}: ${present} حاضر، ${absent} غائب`,
+                        time: 'اليوم'
+                    });
+                } else {
+                    activities.push({
+                        type: 'warning',
+                        title: 'حصة قيد الانتظار',
+                        description: `حصة ${session.subject} - ${session.class} تحتاج تسجيل حضور`,
+                        time: 'قيد الانتظار'
+                    });
+                }
+            });
+
+            activities.slice(0, 5).forEach(activity => {
+                const item = document.createElement('div');
+                item.className = `activity-item ${activity.type}`;
+                item.innerHTML = `
+                    <strong>${activity.title}</strong>
+                    <p>${activity.description}</p>
+                    <div class="activity-time">${activity.time}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderTeachersSection() {
+            const container = document.getElementById('teachersSection');
+            container.innerHTML = '';
+
+            const subjectNames = {
+                math:'رياضيات', arabic:'لغة عربية', english:'لغة إنجليزية',
+                science:'علوم', social:'دراسات اجتماعية', religion:'تربية دينية', computer:'حاسب آلي'
+            };
+
+            teachers.filter(t => t.active).forEach(teacher => {
+                const item = document.createElement('div');
+                item.className = 'activity-item success';
+                const subjectsText = teacher.subjects.map(s => subjectNames[s] || s).join(' • ');
+                item.innerHTML = `
+                    <strong>${teacher.name}</strong>
+                    <p>📚 المواد: ${subjectsText}</p>
+                    <p>📱 ${teacher.phone} ${teacher.email ? `• 📧 ${teacher.email}` : ''}</p>
+                    <p>💰 الراتب: ${teacher.salary} جنيه</p>
+                `;
+                container.appendChild(item);
+            });
+
+            if (teachers.filter(t => t.active).length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">لا يوجد مدرسين نشطين</p>';
+            }
+        }
+
+    </script>
+</body>
+</html>

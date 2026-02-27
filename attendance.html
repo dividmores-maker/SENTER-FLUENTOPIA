@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الحضور والغياب</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAZCGljrXbTP38-MZwzsxOZ8HK34Fykk8o",
+        authDomain: "senter-4e169.firebaseapp.com",
+        projectId: "senter-4e169",
+        storageBucket: "senter-4e169.firebasestorage.app",
+        messagingSenderId: "235178743750",
+        appId: "1:235178743750:web:e4419cfea51a404f2e44c7"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .sessions-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .sessions-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .sessions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .session-card {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-right: 4px solid #2196f3;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .session-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.3);
+        }
+
+        .session-card.completed {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-right-color: #4caf50;
+        }
+
+        .session-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .session-info {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .session-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .session-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .session-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .attendance-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .attendance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .attendance-header h2 {
+            color: #667eea;
+            font-size: 22px;
+        }
+
+        .students-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .student-item:hover {
+            background: #e9ecef;
+            transform: translateX(-5px);
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .student-details h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .student-details p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .attendance-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .attendance-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .attendance-btn.present {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .attendance-btn.present.active {
+            background: #28a745;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .attendance-btn.absent {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .attendance-btn.absent.active {
+            background: #dc3545;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .summary-item {
+            flex: 1;
+        }
+
+        .summary-item .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .summary-item.present .number {
+            color: #28a745;
+        }
+
+        .summary-item.absent .number {
+            color: #dc3545;
+        }
+
+        .summary-item .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .debug-info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        /* ── ZKTeco Bridge UI ── */
+        .bridge-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all .3s;
+        }
+        .bridge-bar.connected    { background:#d4edda; color:#155724; border:2px solid #28a745; }
+        .bridge-bar.disconnected { background:#f8d7da; color:#721c24; border:2px solid #dc3545; }
+        .bridge-bar.connecting   { background:#fff3cd; color:#856404; border:2px solid #ffc107; }
+        .bridge-dot {
+            width:14px; height:14px; border-radius:50%; flex-shrink:0;
+        }
+        .bridge-dot.connected    { background:#28a745; box-shadow:0 0 8px #28a745; animation:blink 1.5s infinite; }
+        .bridge-dot.disconnected { background:#dc3545; }
+        .bridge-dot.connecting   { background:#ffc107; animation:blink .6s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        .fp-section {
+            background: linear-gradient(135deg,#e3f2fd 0%,#bbdefb 100%);
+            border: 2px solid #2196f3;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+        .fp-section h3 { color:#1565c0; margin-bottom:12px; font-size:17px; }
+
+        .fp-log {
+            background:white;
+            border-radius:8px;
+            padding:10px;
+            max-height:220px;
+            overflow-y:auto;
+            margin-top:12px;
+        }
+        .fp-log-row {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:7px 10px;
+            border-radius:6px;
+            margin-bottom:5px;
+            font-size:13px;
+            animation: fadeIn .4s;
+        }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+        .fp-log-row.present { background:#d4edda; color:#155724; border-right:4px solid #28a745; }
+        .fp-log-row.notfound{ background:#fff3cd; color:#856404; border-right:4px solid #ffc107; }
+
+        .badge-fp {
+            display:inline-flex; align-items:center; gap:4px;
+            background:#e3f2fd; color:#1565c0;
+            padding:2px 9px; border-radius:20px; font-size:11px; font-weight:bold;
+        }
+
+        /* ── WhatsApp Send Button ── */
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .btn-whatsapp:hover { box-shadow: 0 6px 20px rgba(37,211,102,0.6); }
+
+        .whatsapp-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+        .whatsapp-section h3 { color: #2e7d32; margin-bottom: 4px; font-size: 17px; }
+        .wa-subtitle { color: #555; font-size: 13px; margin-bottom: 14px; }
+
+        .whatsapp-student-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+        .whatsapp-student-row.present-row  { background:#d4edda; border-right:4px solid #28a745; }
+        .whatsapp-student-row.absent-row   { background:#f8d7da; border-right:4px solid #dc3545; }
+        .whatsapp-student-row.unmarked-row { background:#fff3cd; border-right:4px solid #ffc107; }
+
+        .wa-name { flex: 1; font-weight: bold; color: #333; min-width: 120px; }
+        .wa-status { font-size: 12px; padding: 2px 10px; border-radius: 20px; font-weight: bold; }
+        .wa-status.p { background:#28a745; color:white; }
+        .wa-status.a { background:#dc3545; color:white; }
+        .wa-status.u { background:#ffc107; color:#333; }
+
+        .wa-phone-input {
+            width: 135px;
+            padding: 6px 9px;
+            border: 1.5px solid #bbb;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            direction: ltr;
+        }
+        .wa-send-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 15px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .wa-send-btn:hover { background: #128C7E; transform: scale(1.05); }
+        .wa-send-btn:disabled { background: #aaa; transform: none; cursor: default; }
+        .session-fp-badge {
+            display:inline-block;
+            background:#e8f5e9; color:#2e7d32;
+            padding:2px 9px; border-radius:20px; font-size:11px; font-weight:bold;
+            margin-top:5px;
+        }
+
+        /* ── Session Log Table ── */
+        #sessionLogTable tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        #sessionLogTable tbody tr:hover {
+            background: #f0f4ff;
+        }
+        #sessionLogTable tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        #sessionLogTable tbody tr:nth-child(even):hover {
+            background: #f0f4ff;
+        }
+        .log-stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-top: 4px solid #667eea;
+        }
+        .log-stat-card .stat-num {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .log-stat-card .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        .attendance-rate-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .attendance-rate-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+            transition: width 0.5s ease;
+        }
+        .log-detail-student {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .firebase-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .firebase-status-bar.connected { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+        .firebase-status-bar.connecting { background: #fff3cd; color: #856404; border: 2px solid #ffc107; }
+        .firebase-status-bar.warning { background: #fff3cd; color: #856404; border: 2px solid #ffc107; }
+        .firebase-status-bar.error { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .firebase-dot {
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+        }
+        .firebase-status-bar.connected .firebase-dot { background: #28a745; box-shadow: 0 0 8px #28a745; animation: blink 1.5s infinite; }
+        .firebase-status-bar.connecting .firebase-dot { background: #ffc107; animation: blink 0.6s infinite; }
+        .firebase-status-bar.warning .firebase-dot { background: #ffc107; }
+        .firebase-status-bar.error .firebase-dot { background: #dc3545; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainApp">
+        <div class="header">
+            <div>
+                <h1>✅ الحضور والغياب</h1>
+                <p style="color: #999; margin-top: 5px;">تسجيل حضور وغياب الطلاب</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" onclick="showSessionLog()" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">📋 سجل الحصص</button>
+                <button class="btn" onclick="showReports()">📊 التقارير</button>
+                <a href="index.html" class="btn btn-warning">🏠 الرئيسية</a>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Firebase Status Bar -->
+        <div id="firebaseStatusBar" class="firebase-status-bar connecting">
+            <span id="firebaseDot" class="firebase-dot"></span>
+            <span id="firebaseMsg">🔌 جاري الاتصال...</span>
+        </div>
+        <div class="sessions-container" id="sessionsContainer">
+            <h2>📚 الحصص المتاحة</h2>
+            <div class="sessions-grid" id="sessionsGrid"></div>
+        </div>
+
+        <!-- Session Log Section -->
+        <div class="attendance-container" id="sessionLogContainer" style="display: none;">
+            <div class="attendance-header">
+                <h2>📋 سجل الحصص اليومية</h2>
+                <button class="btn btn-secondary" onclick="backToSessions()">← رجوع</button>
+            </div>
+
+            <!-- Filters -->
+            <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                <h3 style="color: #333; margin-bottom: 15px; font-size: 16px;">🔍 البحث والفلترة</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+                    <div>
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:#555; font-size:13px;">📅 من تاريخ</label>
+                        <input type="date" id="logDateFrom" onchange="renderSessionLog()" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:#555; font-size:13px;">📅 إلى تاريخ</label>
+                        <input type="date" id="logDateTo" onchange="renderSessionLog()" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:#555; font-size:13px;">📚 المادة</label>
+                        <select id="logSubjectFilter" onchange="renderSessionLog()" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;">
+                            <option value="">جميع المواد</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:#555; font-size:13px;">📅 اليوم</label>
+                        <select id="logDayFilter" onchange="renderSessionLog()" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;">
+                            <option value="">جميع الأيام</option>
+                            <option value="السبت">السبت</option>
+                            <option value="الأحد">الأحد</option>
+                            <option value="الاثنين">الاثنين</option>
+                            <option value="الثلاثاء">الثلاثاء</option>
+                            <option value="الأربعاء">الأربعاء</option>
+                            <option value="الخميس">الخميس</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:end;">
+                        <button class="btn btn-secondary" onclick="clearLogFilters()" style="flex:1; padding:10px;">🔄 مسح الفلاتر</button>
+                        <button class="btn" onclick="exportLogToCSV()" style="flex:1; padding:10px; background: linear-gradient(135deg,#11998e,#38ef7d);">📥 تصدير CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Summary -->
+            <div id="logStats" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:15px; margin-bottom:25px;"></div>
+
+            <!-- Log Table -->
+            <div style="overflow-x:auto; border-radius:12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <table id="sessionLogTable" style="width:100%; border-collapse:collapse; font-size:14px; background:white;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white;">
+                            <th style="padding:14px 16px; text-align:right; font-weight:600;">📅 التاريخ</th>
+                            <th style="padding:14px 16px; text-align:right; font-weight:600;">📚 الحصة</th>
+                            <th style="padding:14px 16px; text-align:right; font-weight:600;">🏫 الفصل</th>
+                            <th style="padding:14px 16px; text-align:right; font-weight:600;">👨‍🏫 المدرس</th>
+                            <th style="padding:14px 16px; text-align:right; font-weight:600;">🕐 الوقت</th>
+                            <th style="padding:14px 16px; text-align:center; font-weight:600;">✅ حاضر</th>
+                            <th style="padding:14px 16px; text-align:center; font-weight:600;">❌ غائب</th>
+                            <th style="padding:14px 16px; text-align:center; font-weight:600;">👥 الإجمالي</th>
+                            <th style="padding:14px 16px; text-align:center; font-weight:600;">نسبة الحضور</th>
+                            <th style="padding:14px 16px; text-align:center; font-weight:600;">التفاصيل</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionLogBody">
+                        <tr><td colspan="10" style="padding:40px;text-align:center;color:#999;">لا توجد سجلات بعد</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Session Log Details Modal -->
+        <div class="modal" id="sessionLogDetailModal">
+            <div class="modal-content" style="max-width:700px; max-height:85vh; overflow-y:auto;">
+                <div class="modal-header">
+                    <h2 id="logDetailTitle" style="font-size:18px;">تفاصيل الحصة</h2>
+                    <button class="close-btn" onclick="closeModal('sessionLogDetailModal')">&times;</button>
+                </div>
+                <div id="logDetailContent"></div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div class="attendance-container" id="reportsContainer" style="display: none;">
+            <div class="attendance-header">
+                <h2>📊 تقارير الحضور والغياب</h2>
+                <button class="btn btn-secondary" onclick="backToSessions()">← رجوع</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 600px; margin-bottom: 25px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>اختر التاريخ</label>
+                    <input type="date" id="dateFilter" onchange="filterReportsByDate()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>اختر اليوم</label>
+                    <select id="dayFilter" onchange="filterReportsByDay()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                        <option value="">جميع الأيام</option>
+                        <option value="0">السبت</option>
+                        <option value="1">الأحد</option>
+                        <option value="2">الاثنين</option>
+                        <option value="3">الثلاثاء</option>
+                        <option value="4">الأربعاء</option>
+                        <option value="5">الخميس</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="clearFilters()" style="margin-bottom: 25px;">🔄 إعادة تعيين الفلاتر</button>
+
+            <!-- Debug Info -->
+            <div id="debugInfo" class="debug-info" style="display: none;"></div>
+
+            <div class="sessions-grid" id="reportsGrid"></div>
+        </div>
+
+        <!-- Report Details Section -->
+        <div class="attendance-container" id="reportDetailsContainer" style="display: none;">
+            <div class="attendance-header">
+                <h2 id="reportTitle"></h2>
+                <button class="btn btn-secondary" onclick="backToReports()">← رجوع للتقارير</button>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-item">
+                    <div class="number" id="reportTotalCount">0</div>
+                    <div class="label">إجمالي الطلاب</div>
+                </div>
+                <div class="summary-item present">
+                    <div class="number" id="reportPresentCount">0</div>
+                    <div class="label">حاضر</div>
+                </div>
+                <div class="summary-item absent">
+                    <div class="number" id="reportAbsentCount">0</div>
+                    <div class="label">غائب</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #28a745; margin-bottom: 15px; font-size: 18px;">✅ الطلاب الحاضرون</h3>
+                <div id="presentStudentsList" style="display: grid; gap: 10px;"></div>
+            </div>
+
+            <div>
+                <h3 style="color: #dc3545; margin-bottom: 15px; font-size: 18px;">❌ الطلاب الغائبون</h3>
+                <div id="absentStudentsList" style="display: grid; gap: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Attendance Section -->
+        <div class="attendance-container" id="attendanceContainer" style="display: none;">
+            <div class="attendance-header">
+                <h2 id="sessionTitle"></h2>
+                <button class="btn btn-secondary" onclick="backToSessions()">← رجوع</button>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-item">
+                    <div class="number" id="totalCount">0</div>
+                    <div class="label">إجمالي الطلاب</div>
+                </div>
+                <div class="summary-item present">
+                    <div class="number" id="presentCount">0</div>
+                    <div class="label">حاضر</div>
+                </div>
+                <div class="summary-item absent">
+                    <div class="number" id="absentCount">0</div>
+                    <div class="label">غائب</div>
+                </div>
+            </div>
+
+            <!-- Bridge Status Bar -->
+            <div class="bridge-bar connecting" id="bridgeBar">
+                <div class="bridge-dot connecting" id="bridgeDot"></div>
+                <span id="bridgeMsg">🔌 جاري الاتصال بجهاز البصمة...</span>
+                <button class="btn btn-secondary" style="margin-right:auto;padding:6px 14px;font-size:13px;" onclick="retryBridgeConnect()">🔄 إعادة اتصال</button>
+            </div>
+
+            <!-- Fingerprint Live Section -->
+            <div class="fp-section">
+                <h3>🖐️ تسجيل الحضور بالبصمة — مباشر</h3>
+                <p style="color:#555;font-size:13px;margin-bottom:10px;">
+                    عندما يضع الطالب إصبعه على الجهاز، يُسجَّل حضوره تلقائياً بناءً على كوده.
+                </p>
+                <div style="margin-bottom:12px;">
+                    <button class="btn" style="font-size:13px;padding:8px 16px;" onclick="showCodeMapModal()">🔑 إدارة أكواد الطلاب</button>
+                    <span id="mappingCount" style="margin-right:10px;color:#666;font-size:13px;"></span>
+                </div>
+                <div style="font-size:13px;color:#444;margin-bottom:6px;">📋 آخر البصمات المسجلة:</div>
+                <div class="fp-log" id="fpLog">
+                    <p style="color:#999;text-align:center;padding:10px;">في انتظار بصمة الطلاب...</p>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+                <button class="btn" onclick="showAddStudentModal()">➕ إضافة طالب للحصة</button>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-whatsapp" onclick="showWhatsappSection()">📱 إرسال لولي الأمر</button>
+                    <button class="btn btn-success" onclick="saveAttendance()">💾 حفظ الحضور</button>
+                </div>
+            </div>
+
+            <!-- WhatsApp Section -->
+            <div class="whatsapp-section" id="whatsappSection" style="display:none;">
+                <h3>📱 إرسال إشعار لأولياء الأمور عبر واتساب</h3>
+                <p class="wa-subtitle">أدخل رقم ولي الأمر لكل طالب ثم اضغط إرسال — سيفتح واتساب بالرسالة تلقائياً</p>
+                <div id="whatsappStudentsList"></div>
+            </div>
+
+            <div class="students-list" id="studentsList"></div>
+        </div>
+    </div>
+
+    <!-- Code Mapping Modal -->
+    <div class="modal" id="codeMapModal">
+        <div class="modal-content" style="max-width:580px;">
+            <div class="modal-header">
+                <h2>🔑 أكواد الطلاب في جهاز البصمة</h2>
+                <button class="close-btn" onclick="closeModal('codeMapModal')">&times;</button>
+            </div>
+            <p style="color:#666;font-size:13px;margin-bottom:15px;">كل طالب له كود مسجل في جهاز ZKTeco. اربط كود الجهاز باسم الطالب هنا.</p>
+            <div id="codeMapList" style="max-height:300px;overflow-y:auto;margin-bottom:15px;"></div>
+            <div style="background:#f8f9fa;border-radius:8px;padding:15px;">
+                <div style="font-weight:bold;margin-bottom:10px;color:#333;">➕ إضافة / تعديل</div>
+                <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:10px;align-items:end;">
+                    <div>
+                        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">كود الجهاز</label>
+                        <input type="text" id="codeInput" placeholder="مثال: 1" style="width:100%;padding:9px;border:2px solid #e0e0e0;border-radius:6px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">اسم الطالب</label>
+                        <input type="text" id="codeNameInput" placeholder="اسم الطالب كما في القائمة" style="width:100%;padding:9px;border:2px solid #e0e0e0;border-radius:6px;">
+                    </div>
+                    <button class="btn btn-success" style="padding:9px 16px;" onclick="addCodeMapping()">حفظ</button>
+                </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" style="font-size:13px;" onclick="importCodesFromStudents()">📥 استيراد أسماء الطلاب الحاليين</button>
+                <button class="btn" style="font-size:13px;background:#dc3545;" onclick="clearAllMappings()">🗑️ حذف الكل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal" id="addStudentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ إضافة طالب للحصة</h2>
+                <button class="close-btn" onclick="closeModal('addStudentModal')">&times;</button>
+            </div>
+            <form onsubmit="addStudentToSession(event)">
+                <div class="form-group">
+                    <label>اسم الطالب</label>
+                    <input type="text" id="studentName" placeholder="أدخل اسم الطالب" required>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn" style="flex: 1;">✔ إضافة</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal('addStudentModal')">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    </div><!-- /#mainApp -->
+
+    <!-- ══ Auth + Firestore + Main App ═══════════════════════ -->
+    <script>
+        let currentUser = { uid: 'default_user' };
+        let _appReady   = false;
+
+        function setFirebaseStatus(state, msg) {
+            const bar = document.getElementById('firebaseStatusBar');
+            const dot = document.getElementById('firebaseDot');
+            const txt = document.getElementById('firebaseMsg');
+            if (!bar) return;
+            bar.className = 'firebase-status-bar ' + state;
+            txt.textContent = msg;
+        }
+
+        // ── Firestore helpers ──
+        function userCol(colName) {
+            return db.collection('attendance_data').doc('default_user').collection(colName);
+        }
+
+        // ── Mapping helpers ──
+        async function loadMappings() {
+            const snap = await userCol('zkCodeMap').get();
+            const map = {};
+            snap.forEach(doc => { map[doc.id] = doc.data().name; });
+            return map;
+        }
+
+        async function saveMappings(map) {
+            const batch = db.batch();
+            const existing = await userCol('zkCodeMap').get();
+            existing.forEach(doc => batch.delete(doc.ref));
+            Object.entries(map).forEach(([code, name]) => {
+                batch.set(userCol('zkCodeMap').doc(String(code)), { name });
+            });
+            await batch.commit();
+            updateMappingCount();
+        }
+
+        // حفظ أرقام أولياء الأمور (Firestore)
+        async function loadParentPhones() {
+            const snap = await userCol('parentPhones').get();
+            const phones = {};
+            snap.forEach(doc => { phones[doc.id] = doc.data().phone; });
+            return phones;
+        }
+        async function saveParentPhones(phones) {
+            const batch = db.batch();
+            const existing = await userCol('parentPhones').get();
+            existing.forEach(doc => batch.delete(doc.ref));
+            Object.entries(phones).forEach(([id, phone]) => {
+                batch.set(userCol('parentPhones').doc(String(id)), { phone });
+            });
+            await batch.commit();
+        }
+        function getSubjectName(key) {
+            const subjects = {
+                math: 'رياضيات',
+                arabic: 'لغة عربية',
+                english: 'لغة إنجليزية',
+                science: 'علوم',
+                social: 'دراسات اجتماعية',
+                religion: 'تربية دينية',
+                computer: 'حاسب آلي'
+            };
+            return subjects[key] || key;
+        }
+
+        function getClassName(key, customClasses) {
+            // Check custom classes from schedule first
+            if (customClasses && Array.isArray(customClasses)) {
+                const found = customClasses.find(c => c.id == key || c.name == key);
+                if (found) return found.name;
+            }
+            const classes = {
+                grade1: 'الأول الابتدائي', grade2: 'الثاني الابتدائي',
+                grade3: 'الثالث الابتدائي', grade4: 'الرابع الابتدائي',
+                grade5: 'الخامس الابتدائي', grade6: 'السادس الابتدائي',
+                grade7: 'الأول الإعدادي',  grade8: 'الثاني الإعدادي',
+                grade9: 'الثالث الإعدادي'
+            };
+            return classes[key] || key;
+        }
+
+        function getTeacherName(key) {
+            const teachers = {
+                t1: 'أ. محمد أحمد',
+                t2: 'أ. فاطمة علي',
+                t3: 'أ. خالد محمود',
+                t4: 'أ. سارة حسن',
+                t5: 'أ. نور الدين',
+                t6: 'أ. منى إبراهيم'
+            };
+            return teachers[key] || key;
+        }
+
+        function getDayName(dayIndex) {
+            const days = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+            return days[dayIndex] || '';
+        }
+
+        function getRoomName(key) {
+            return key.toUpperCase();
+        }
+
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            let period = 'صباحاً';
+            if (hour >= 12 && hour < 17) period = 'ظهراً';
+            else if (hour >= 17) period = 'مساءً';
+            const displayHour = hour > 12 ? hour - 12 : hour;
+            return `${displayHour}:${minutes} ${period}`;
+        }
+
+        function getAttendanceDataForSession(sessionId) {
+            // Reads from in-memory fbAttMap (populated in _startApp)
+            return window._fbAttMap ? window._fbAttMap[sessionId] : null;
+        }
+
+        let sessions = [];
+        let currentSessionId = null;
+        let nextStudentId = 1;
+
+        // ── Async initializer ──
+        async function _startApp() {
+            setFirebaseStatus('connecting', '🔌 جاري الاتصال بـ Firebase...');
+
+            // Load attendance data from Firestore into memory
+            try {
+                const attSnap = await userCol('attendanceSessions').get();
+                window._fbAttMap = {};
+                attSnap.forEach(doc => { window._fbAttMap[doc.id] = doc.data(); });
+                console.log(`✅ تم تحميل ${attSnap.size} سجل حضور`);
+            } catch(e) {
+                console.error('❌ خطأ في تحميل سجلات الحضور:', e);
+                setFirebaseStatus('error', '❌ خطأ في الصلاحيات — راجع Firebase Rules');
+            }
+
+            // Load sessions from Firestore schedule
+            await loadSessionsFromFirestore();
+
+            sessions.forEach(session => {
+                session.students.forEach(student => {
+                    if (student.id >= nextStudentId) nextStudentId = student.id + 1;
+                });
+            });
+            renderSessions();
+            updateMappingCount();
+            pollBridge();
+
+            // Listen for real-time schedule changes
+            db.collection('schedule').doc('data').onSnapshot(snap => {
+                if (snap.exists) {
+                    console.log('🔄 تحديث الجدول من Firebase، عدد الحصص:', (snap.data().sessions || []).length);
+                    buildSessionsFromSchedule(snap.data());
+                    if (!currentSessionId) renderSessions();
+                    setFirebaseStatus('connected', `🔥 Firebase متصل — ${sessions.length} حصة محملة`);
+                } else {
+                    console.warn('⚠️ لا يوجد بيانات جدول في Firebase — أضف حصص من صفحة الجدول');
+                    setFirebaseStatus('warning', '⚠️ لا توجد حصص في Firebase — اذهب لصفحة جدول الحصص');
+                }
+            }, err => {
+                console.error('❌ Firebase listener error:', err);
+                setFirebaseStatus('error', '❌ خطأ في الاتصال: ' + err.message);
+            });
+        }
+
+        // Build sessions array from Firestore schedule data
+        function buildSessionsFromSchedule(data) {
+            const scheduleSessions = data.sessions || [];
+            sessions = scheduleSessions.map(session => {
+                const existingData = window._fbAttMap ? window._fbAttMap[session.id] : null;
+                return {
+                    id: session.id,
+                    subject: getSubjectName(session.subject),
+                    class: getClassName(session.class, data.classes),
+                    teacher: getTeacherName(session.teacher),
+                    day: getDayName(session.day),
+                    dayIndex: session.day,
+                    time: `${formatTime(session.startTime)} - ${formatTime(session.endTime)}`,
+                    room: getRoomName(session.room),
+                    students: existingData ? existingData.students : [],
+                    completed: existingData ? existingData.completed : false
+                };
+            });
+        }
+
+        async function loadSessionsFromFirestore() {
+            try {
+                setFirebaseStatus('connecting', '📡 جاري تحميل جدول الحصص...');
+                const snap = await db.collection('schedule').doc('data').get();
+                if (snap.exists) {
+                    const data = snap.data();
+                    const count = (data.sessions || []).length;
+                    console.log(`✅ جدول الحصص محمّل: ${count} حصة`);
+                    buildSessionsFromSchedule(data);
+                    setFirebaseStatus('connected', `🔥 Firebase متصل — ${count} حصة محملة`);
+                } else {
+                    console.warn('⚠️ لا يوجد document في schedule/data');
+                    sessions = [];
+                    setFirebaseStatus('warning', '⚠️ لا توجد حصص — اذهب لصفحة جدول الحصص وأضف حصصاً');
+                }
+            } catch(e) {
+                console.error('❌ خطأ في تحميل الجدول:', e);
+                sessions = [];
+                setFirebaseStatus('error', '❌ خطأ: ' + e.message + ' — تأكد من Firebase Rules');
+            }
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+        function renderSessions() {
+            const grid = document.getElementById('sessionsGrid');
+            grid.innerHTML = '';
+
+            if (sessions.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                        <p style="font-size: 18px; margin-bottom: 10px;">📅 لا توجد حصص متاحة</p>
+                        <p>يرجى إضافة حصص من صفحة جدول الحصص أولاً</p>
+                        <a href="schedule_management.html" class="btn" style="margin-top: 20px; display: inline-block;">
+                            ➕ إضافة حصص
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            sessions.forEach(session => {
+                const card = document.createElement('div');
+                card.className = `session-card ${session.completed ? 'completed' : ''}`;
+                card.onclick = () => openAttendance(session.id);
+                
+                card.innerHTML = `
+                    <div class="session-header">${session.subject}</div>
+                    <div class="session-info">📚 ${session.class}</div>
+                    <div class="session-info">👨‍🏫 ${session.teacher}</div>
+                    <div class="session-info">📅 ${session.day} • ${session.time}</div>
+                    <div class="session-info">🏫 قاعة ${session.room}</div>
+                    <div class="session-info">👥 ${session.students.length} طالب</div>
+                    <span class="session-status ${session.completed ? 'completed' : 'pending'}">
+                        ${session.completed ? '✔ تم التسجيل' : '⏳ قيد الانتظار'}
+                    </span>
+                    <br><span class="session-fp-badge">🖐️ يدعم البصمة</span>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function openAttendance(sessionId) {
+            currentSessionId = sessionId;
+            const session = sessions.find(s => s.id === sessionId);
+            
+            if (!session) {
+                showAlert('لم يتم العثور على الحصة!', 'danger');
+                return;
+            }
+            
+            document.getElementById('sessionsContainer').style.display = 'none';
+            document.getElementById('reportsContainer').style.display = 'none';
+            document.getElementById('attendanceContainer').style.display = 'block';
+            document.getElementById('sessionTitle').textContent = 
+                `${session.subject} - ${session.class}`;
+            
+            renderStudents();
+            updateSummary();
+        }
+
+        function backToSessions() {
+            document.getElementById('sessionsContainer').style.display = 'block';
+            document.getElementById('attendanceContainer').style.display = 'none';
+            document.getElementById('reportsContainer').style.display = 'none';
+            document.getElementById('reportDetailsContainer').style.display = 'none';
+            currentSessionId = null;
+            renderSessions();
+        }
+
+        function showReports() {
+            document.getElementById('sessionsContainer').style.display = 'none';
+            document.getElementById('reportsContainer').style.display = 'block';
+            document.getElementById('dayFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            renderReports();
+        }
+
+        function clearFilters() {
+            document.getElementById('dayFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            renderReports();
+        }
+
+        function filterReportsByDay() {
+            // Clear date filter when using day filter
+            document.getElementById('dateFilter').value = '';
+            renderReports();
+        }
+
+        function filterReportsByDate() {
+            // Clear day filter when using date filter
+            document.getElementById('dayFilter').value = '';
+            renderReports();
+        }
+
+        async function renderReports() {
+            const grid = document.getElementById('reportsGrid');
+            const dayFilter = document.getElementById('dayFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const debugInfo = document.getElementById('debugInfo');
+
+            grid.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">⏳ جاري التحميل...</p>';
+
+            const snap = await userCol('attendanceHistory').get();
+            const attendanceHistory = [];
+            snap.forEach(doc => attendanceHistory.push(doc.data()));
+
+            let filteredRecords = [];
+            let debugText = `<strong>معلومات التصحيح:</strong><br>`;
+
+            if (dateFilter !== '') {
+                const selectedDate = new Date(dateFilter);
+                const selectedDayIndex = selectedDate.getDay();
+                const ourDayIndex = selectedDayIndex === 0 ? 1 : selectedDayIndex === 6 ? 0 : selectedDayIndex + 1;
+                debugText += `التاريخ المختار: ${dateFilter}<br>اليوم المقابل: ${getDayName(ourDayIndex)}<br>`;
+                const scheduleSessions = JSON.parse(localStorage.getItem('scheduleSessions') || '[]');
+                const sessionsOnThisDay = scheduleSessions.filter(s => s.day === ourDayIndex);
+                debugText += `عدد الحصص المجدولة: ${sessionsOnThisDay.length}<br>عدد السجلات: ${attendanceHistory.length}<br>`;
+                sessionsOnThisDay.forEach(session => {
+                    const attendanceRecord = attendanceHistory.find(r => r.id === session.id && r.saveDate === dateFilter);
+                    if (attendanceRecord) {
+                        filteredRecords.push(attendanceRecord);
+                    } else {
+                        filteredRecords.push({
+                            id: session.id, subject: getSubjectName(session.subject),
+                            class: getClassName(session.class), teacher: getTeacherName(session.teacher),
+                            day: getDayName(session.day), dayIndex: session.day,
+                            time: `${formatTime(session.startTime)} - ${formatTime(session.endTime)}`,
+                            room: getRoomName(session.room), students: [], saveDate: dateFilter,
+                            saveTime: '--:--:--', recordId: `virtual_${session.id}_${dateFilter}`,
+                            completed: false, isVirtual: true
+                        });
+                    }
+                });
+            } else if (dayFilter !== '') {
+                debugText += `فلتر اليوم: ${getDayName(parseInt(dayFilter))}<br>`;
+                filteredRecords = attendanceHistory.filter(r => r.dayIndex !== undefined && r.dayIndex.toString() === dayFilter);
+            } else {
+                filteredRecords = attendanceHistory;
+                debugText += `عرض جميع السجلات — الإجمالي: ${attendanceHistory.length}<br>`;
+            }
+
+            grid.innerHTML = '';
+            debugInfo.innerHTML = debugText;
+            debugInfo.style.display = 'block';
+
+            if (filteredRecords.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#666;"><p style="font-size:18px;margin-bottom:10px;">📋 لا توجد سجلات حضور</p><p>لم يتم تسجيل أي حضور</p></div>`;
+                return;
+            }
+
+            filteredRecords.sort((a, b) => new Date(b.saveDate + ' ' + b.saveTime) - new Date(a.saveDate + ' ' + a.saveTime));
+
+            filteredRecords.forEach(record => {
+                const presentCount = record.students.filter(s => s.status === 'present').length;
+                const absentCount  = record.students.filter(s => s.status === 'absent').length;
+                const totalCount   = record.students.length;
+                const dateParts    = record.saveDate.split('-');
+                const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                let formattedTime = '--:--';
+                if (record.saveTime && record.saveTime !== '--:--:--') {
+                    const tp = record.saveTime.split(':');
+                    const h = parseInt(tp[0]);
+                    const p = h >= 17 ? 'مساءً' : h >= 12 ? 'ظهراً' : 'صباحاً';
+                    formattedTime = `${h > 12 ? h - 12 : h}:${tp[1]} ${p}`;
+                }
+                const card = document.createElement('div');
+                card.className = record.isVirtual ? 'session-card' : 'session-card completed';
+                card.onclick = () => record.isVirtual ? openAttendance(record.id) : showReportDetails(record.recordId);
+                card.innerHTML = `
+                    <div class="session-header">${record.subject}</div>
+                    <div class="session-info">📚 ${record.class}</div>
+                    <div class="session-info">👨‍🏫 ${record.teacher}</div>
+                    <div class="session-info">📅 ${record.day} • ${record.time}</div>
+                    <div class="session-info">🏫 قاعة ${record.room}</div>
+                    <div class="session-info" style="color:#667eea;font-weight:bold;">📆 ${formattedDate}</div>
+                    ${!record.isVirtual ? `<div class="session-info" style="color:#667eea;font-weight:bold;">🕐 ${formattedTime}</div>` : ''}
+                    <div style="margin-top:15px;padding-top:15px;border-top:2px solid rgba(255,255,255,0.3);">
+                        ${record.isVirtual ?
+                            `<div class="session-info" style="color:#ff9800;font-weight:bold;">⏳ لم يتم تسجيل الحضور بعد</div>` :
+                            `<div class="session-info" style="color:#28a745;font-weight:bold;">✅ حاضر: ${presentCount}</div>
+                             <div class="session-info" style="color:#dc3545;font-weight:bold;">❌ غائب: ${absentCount}</div>
+                             <div class="session-info" style="color:#333;font-weight:bold;">👥 الإجمالي: ${totalCount}</div>`}
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        async function showReportDetails(recordId) {
+            const snap = await userCol('attendanceHistory').doc(recordId).get();
+            const record = snap.exists ? snap.data() : null;
+            
+            if (!record) return;
+            
+            document.getElementById('reportsContainer').style.display = 'none';
+            document.getElementById('reportDetailsContainer').style.display = 'block';
+            
+            // Format date
+            const dateParts = record.saveDate.split('-');
+            const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+            
+            document.getElementById('reportTitle').textContent = 
+                `تقرير: ${record.subject} - ${record.class} (${formattedDate})`;
+            
+            const presentStudents = record.students.filter(s => s.status === 'present');
+            const absentStudents = record.students.filter(s => s.status === 'absent');
+            
+            document.getElementById('reportTotalCount').textContent = record.students.length;
+            document.getElementById('reportPresentCount').textContent = presentStudents.length;
+            document.getElementById('reportAbsentCount').textContent = absentStudents.length;
+            
+            // Render present students
+            const presentList = document.getElementById('presentStudentsList');
+            presentList.innerHTML = '';
+            if (presentStudents.length === 0) {
+                presentList.innerHTML = '<p style="color: #999; padding: 15px; background: #f8f9fa; border-radius: 8px;">لا يوجد طلاب حاضرون</p>';
+            } else {
+                presentStudents.forEach(student => {
+                    const item = document.createElement('div');
+                    item.className = 'student-item';
+                    item.style.background = '#d4edda';
+                    item.style.border = '2px solid #c3e6cb';
+                    
+                    const initials = student.name.split(' ').map(n => n[0]).join('');
+                    
+                    item.innerHTML = `
+                        <div class="student-info">
+                            <div class="student-avatar" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">${initials}</div>
+                            <div class="student-details">
+                                <h3>${student.name}</h3>
+                                <p style="color: #155724;">حاضر ✔</p>
+                            </div>
+                        </div>
+                    `;
+                    presentList.appendChild(item);
+                });
+            }
+            
+            // Render absent students
+            const absentList = document.getElementById('absentStudentsList');
+            absentList.innerHTML = '';
+            if (absentStudents.length === 0) {
+                absentList.innerHTML = '<p style="color: #999; padding: 15px; background: #f8f9fa; border-radius: 8px;">لا يوجد طلاب غائبون</p>';
+            } else {
+                absentStudents.forEach(student => {
+                    const item = document.createElement('div');
+                    item.className = 'student-item';
+                    item.style.background = '#f8d7da';
+                    item.style.border = '2px solid #f5c6cb';
+                    
+                    const initials = student.name.split(' ').map(n => n[0]).join('');
+                    
+                    item.innerHTML = `
+                        <div class="student-info">
+                            <div class="student-avatar" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">${initials}</div>
+                            <div class="student-details">
+                                <h3>${student.name}</h3>
+                                <p style="color: #721c24;">غائب ✗</p>
+                            </div>
+                        </div>
+                    `;
+                    absentList.appendChild(item);
+                });
+            }
+        }
+
+        function backToReports() {
+            document.getElementById('reportDetailsContainer').style.display = 'none';
+            document.getElementById('reportsContainer').style.display = 'block';
+        }
+
+        function renderStudents() {
+            const session = sessions.find(s => s.id === currentSessionId);
+            const list = document.getElementById('studentsList');
+            list.innerHTML = '';
+
+            session.students.forEach(student => {
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                
+                const initials = student.name.split(' ').map(n => n[0]).join('');
+                
+                item.innerHTML = `
+                    <div class="student-info">
+                        <div class="student-avatar">${initials}</div>
+                        <div class="student-details">
+                            <h3>${student.name}</h3>
+                            <p>${session.class} • قاعة ${session.room}${student.fingerprintAt ? ' &nbsp;<span class="badge-fp">🖐️ ' + student.fingerprintAt + '</span>' : ''}</p>
+                        </div>
+                    </div>
+                    <div class="attendance-buttons">
+                        <button class="attendance-btn present ${student.status === 'present' ? 'active' : ''}" 
+                                onclick="markAttendance(${student.id}, 'present')">
+                            ✔ حاضر
+                        </button>
+                        <button class="attendance-btn absent ${student.status === 'absent' ? 'active' : ''}" 
+                                onclick="markAttendance(${student.id}, 'absent')">
+                            ✗ غائب
+                        </button>
+                    </div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        async function markAttendance(studentId, status) {
+            const session = sessions.find(s => s.id === currentSessionId);
+            const student = session.students.find(s => s.id === studentId);
+            student.status = status;
+
+            // حفظ في Firestore
+            if (!window._fbAttMap) window._fbAttMap = {};
+            window._fbAttMap[session.id] = session;
+            await userCol('attendanceSessions').doc(String(session.id)).set(session);
+
+            renderStudents();
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const session = sessions.find(s => s.id === currentSessionId);
+            const total = session.students.length;
+            const present = session.students.filter(s => s.status === 'present').length;
+            const absent = session.students.filter(s => s.status === 'absent').length;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('presentCount').textContent = present;
+            document.getElementById('absentCount').textContent = absent;
+        }
+
+        function showAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        async function addStudentToSession(e) {
+            e.preventDefault();
+            const studentName = document.getElementById('studentName').value;
+            const session = sessions.find(s => s.id === currentSessionId);
+            const newStudent = { id: nextStudentId++, name: studentName, status: null };
+            session.students.push(newStudent);
+
+            if (!window._fbAttMap) window._fbAttMap = {};
+            window._fbAttMap[session.id] = session;
+            await userCol('attendanceSessions').doc(String(session.id)).set(session);
+
+            showAlert(`تم إضافة الطالب "${studentName}" بنجاح! ✓`);
+            closeModal('addStudentModal');
+            document.getElementById('studentName').value = '';
+            renderStudents();
+            updateSummary();
+        }
+
+        // ══════════════════════════════════════════════════
+        //  WhatsApp Notifications
+        // ══════════════════════════════════════════════════
+
+        // حفظ أرقام أولياء الأمور (Firestore)
+        async function loadParentPhones() {
+            const snap = await userCol('parentPhones').get();
+            const phones = {};
+            snap.forEach(doc => { phones[doc.id] = doc.data().phone; });
+            return phones;
+        }
+        async function saveParentPhones(phones) {
+            const batch = db.batch();
+            const existing = await userCol('parentPhones').get();
+            existing.forEach(doc => batch.delete(doc.ref));
+            Object.entries(phones).forEach(([id, phone]) => {
+                batch.set(userCol('parentPhones').doc(String(id)), { phone });
+            });
+            await batch.commit();
+        }
+
+        function showWhatsappSection() {
+            const section = document.getElementById('whatsappSection');
+            const isVisible = section.style.display !== 'none';
+            if (isVisible) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = 'block';
+            renderWhatsappList();
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function renderWhatsappList() {
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) return;
+
+            const phones = await loadParentPhones();
+            const list   = document.getElementById('whatsappStudentsList');
+
+            if (session.students.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">لا يوجد طلاب في هذه الحصة</p>';
+                return;
+            }
+
+            list.innerHTML = `
+                <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+                    <button class="btn btn-whatsapp" style="font-size:13px;padding:9px 18px;" onclick="sendAllWhatsapp()">
+                        📤 إرسال للجميع
+                    </button>
+                    <span style="font-size:12px;color:#555;align-self:center;">* سيفتح واتساب لكل طالب له رقم محفوظ</span>
+                </div>
+                <div id="waStudentsRows"></div>
+            `;
+
+            const rowsContainer = document.getElementById('waStudentsRows');
+            session.students.forEach(student => {
+                const status   = student.status;
+                const rowClass = status === 'present' ? 'present-row' : status === 'absent' ? 'absent-row' : 'unmarked-row';
+                const statusLabel = status === 'present' ? 'حاضر ✔' : status === 'absent' ? 'غائب ✗' : 'لم يُسجَّل';
+                const statusClass = status === 'present' ? 'p' : status === 'absent' ? 'a' : 'u';
+                const savedPhone  = phones[student.id] || '';
+
+                const row = document.createElement('div');
+                row.className = `whatsapp-student-row ${rowClass}`;
+                row.id = `wa-row-${student.id}`;
+                row.innerHTML = `
+                    <span class="wa-name">${student.name}</span>
+                    <span class="wa-status ${statusClass}">${statusLabel}</span>
+                    <input type="tel"
+                           class="wa-phone-input"
+                           id="phone-${student.id}"
+                           placeholder="01xxxxxxxxx"
+                           value="${savedPhone}"
+                           onchange="savePhoneNumber(${student.id}, this.value)"
+                           dir="ltr">
+                    <button class="wa-send-btn" onclick="sendWhatsapp(${student.id})">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        إرسال
+                    </button>
+                `;
+                rowsContainer.appendChild(row);
+            });
+        }
+
+        async function savePhoneNumber(studentId, phone) {
+            const phones = await loadParentPhones();
+            if (phone.trim()) phones[studentId] = phone.trim();
+            else delete phones[studentId];
+            await saveParentPhones(phones);
+        }
+
+        function buildWhatsappMessage(student, session) {
+            const sessionName = `${session.subject} - ${session.class}`;
+            const today = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            if (student.status === 'present') {
+                return `السلام عليكم ورحمة الله وبركاته 🌟\n\nولي أمر الطالب / ${student.name}\n\nيسعدنا إخباركم بأن ابنكم/ابنتكم\n*${student.name}*\nقد حضر درس *${sessionName}*\nبتاريخ: ${today}\n\n✅ *تم حضور الدرس*\n\nنشكر حرصكم على حضور أبنائكم 🙏`;
+            } else if (student.status === 'absent') {
+                return `السلام عليكم ورحمة الله وبركاته\n\nولي أمر الطالب / ${student.name}\n\nنود إعلامكم بأن ابنكم/ابنتكم\n*${student.name}*\nلم يحضر درس *${sessionName}*\nبتاريخ: ${today}\n\n❌ *الطالب لم يحضر الدرس*\n\nنرجو متابعة انتظام الحضور للاستفادة القصوى من الدراسة 🙏`;
+            } else {
+                return `السلام عليكم ورحمة الله وبركاته\n\nولي أمر الطالب / ${student.name}\n\nنود إعلامكم بأن حضور ابنكم/ابنتكم\n*${student.name}*\nلم يتم تسجيله في درس *${sessionName}*\nبتاريخ: ${today}\n\n⚠️ *لم يتم تسجيل الحضور*\n\nنرجو التواصل معنا لمزيد من المعلومات 🙏`;
+            }
+        }
+
+        function sendWhatsapp(studentId) {
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) return;
+
+            const student = session.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            // احفظ الرقم من الـ input أولاً
+            const phoneInput = document.getElementById(`phone-${studentId}`);
+            const phone = phoneInput ? phoneInput.value.trim() : '';
+
+            if (!phone) {
+                phoneInput.style.border = '2px solid #dc3545';
+                phoneInput.placeholder = 'أدخل الرقم أولاً!';
+                setTimeout(() => {
+                    phoneInput.style.border = '';
+                    phoneInput.placeholder = '01xxxxxxxxx';
+                }, 2000);
+                return;
+            }
+
+            savePhoneNumber(studentId, phone);
+
+            // تنسيق الرقم
+            let formattedPhone = phone.replace(/\D/g, '');
+            if (formattedPhone.startsWith('0')) {
+                formattedPhone = '2' + formattedPhone; // Egypt code
+            }
+
+            const message = buildWhatsappMessage(student, session);
+            const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        async function sendAllWhatsapp() {
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) return;
+
+            const phones = await loadParentPhones();
+            let sentCount = 0;
+
+            session.students.forEach((student, idx) => {
+                const phoneInput = document.getElementById(`phone-${student.id}`);
+                if (phoneInput && phoneInput.value.trim()) {
+                    savePhoneNumber(student.id, phoneInput.value.trim());
+                    phones[student.id] = phoneInput.value.trim();
+                }
+                if (phones[student.id]) {
+                    setTimeout(() => { sendWhatsapp(student.id); }, idx * 800);
+                    sentCount++;
+                }
+            });
+
+            if (sentCount === 0) {
+                showAlert('لا توجد أرقام محفوظة! أدخل أرقام أولياء الأمور أولاً', 'danger');
+            } else {
+                showAlert(`📤 جاري فتح واتساب لـ ${sentCount} طالب...`);
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        async function saveAttendance() {
+            const session = sessions.find(s => s.id === currentSessionId);
+            const unmarked = session.students.filter(s => s.status === null).length;
+            if (unmarked > 0) {
+                if (!confirm(`هناك ${unmarked} طالب لم يتم تسجيل حضورهم. هل تريد الحفظ؟`)) return;
+            }
+
+            const now = new Date();
+            const saveDate = now.toISOString().split('T')[0];
+            const saveTime = now.toTimeString().split(' ')[0];
+            const recordId = `${session.id}_${Date.now()}`;
+
+            const attendanceRecord = {
+                ...session,
+                dayIndex: session.dayIndex,
+                saveDate, saveTime, recordId, completed: true
+            };
+
+            // حفظ في Firestore
+            await userCol('attendanceHistory').doc(recordId).set(attendanceRecord);
+
+            session.completed = true;
+            if (!window._fbAttMap) window._fbAttMap = {};
+            window._fbAttMap[session.id] = session;
+            await userCol('attendanceSessions').doc(String(session.id)).set(session);
+
+            showAlert('تم حفظ بيانات الحضور بنجاح! ✔', 'success');
+            setTimeout(() => { backToSessions(); renderSessions(); }, 1500);
+        }
+
+        // ══════════════════════════════════════════════════
+        //  Session Log (Daily Class Register)
+        // ══════════════════════════════════════════════════
+
+        function showSessionLog() {
+            document.getElementById('sessionsContainer').style.display = 'none';
+            document.getElementById('reportsContainer').style.display = 'none';
+            document.getElementById('attendanceContainer').style.display = 'none';
+            document.getElementById('reportDetailsContainer').style.display = 'none';
+            document.getElementById('sessionLogContainer').style.display = 'block';
+            populateSubjectFilter();
+            renderSessionLog();
+        }
+
+        async function populateSubjectFilter() {
+            const snap = await userCol('attendanceHistory').get();
+            const subjects = new Set();
+            snap.forEach(doc => { if (doc.data().subject) subjects.add(doc.data().subject); });
+            const sel = document.getElementById('logSubjectFilter');
+            sel.innerHTML = '<option value="">جميع المواد</option>';
+            subjects.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s; opt.textContent = s;
+                sel.appendChild(opt);
+            });
+        }
+
+        function clearLogFilters() {
+            document.getElementById('logDateFrom').value = '';
+            document.getElementById('logDateTo').value = '';
+            document.getElementById('logSubjectFilter').value = '';
+            document.getElementById('logDayFilter').value = '';
+            renderSessionLog();
+        }
+
+        async function renderSessionLog() {
+            const snap = await userCol('attendanceHistory').get();
+            const history = [];
+            snap.forEach(doc => history.push(doc.data()));
+
+            const dateFrom = document.getElementById('logDateFrom').value;
+            const dateTo   = document.getElementById('logDateTo').value;
+            const subjectF = document.getElementById('logSubjectFilter').value;
+            const dayF     = document.getElementById('logDayFilter').value;
+
+            let records = history.filter(r => !r.isVirtual);
+            if (dateFrom) records = records.filter(r => r.saveDate >= dateFrom);
+            if (dateTo)   records = records.filter(r => r.saveDate <= dateTo);
+            if (subjectF) records = records.filter(r => r.subject === subjectF);
+            if (dayF)     records = records.filter(r => r.day === dayF);
+
+            // Sort newest first
+            records.sort((a,b) => {
+                const da = new Date(a.saveDate + 'T' + (a.saveTime || '00:00:00'));
+                const db = new Date(b.saveDate + 'T' + (b.saveTime || '00:00:00'));
+                return db - da;
+            });
+
+            // Stats
+            const totalSessions  = records.length;
+            const totalStudents  = records.reduce((s,r) => s + r.students.length, 0);
+            const totalPresent   = records.reduce((s,r) => s + r.students.filter(st => st.status === 'present').length, 0);
+            const totalAbsent    = records.reduce((s,r) => s + r.students.filter(st => st.status === 'absent').length, 0);
+            const avgRate        = totalStudents > 0 ? Math.round((totalPresent / totalStudents) * 100) : 0;
+
+            document.getElementById('logStats').innerHTML = `
+                <div class="log-stat-card">
+                    <div class="stat-num">${totalSessions}</div>
+                    <div class="stat-label">إجمالي الحصص</div>
+                </div>
+                <div class="log-stat-card" style="border-top-color:#28a745;">
+                    <div class="stat-num" style="color:#28a745;">${totalPresent}</div>
+                    <div class="stat-label">إجمالي الحضور</div>
+                </div>
+                <div class="log-stat-card" style="border-top-color:#dc3545;">
+                    <div class="stat-num" style="color:#dc3545;">${totalAbsent}</div>
+                    <div class="stat-label">إجمالي الغياب</div>
+                </div>
+                <div class="log-stat-card" style="border-top-color:#ffc107;">
+                    <div class="stat-num" style="color:#856404;">${avgRate}%</div>
+                    <div class="stat-label">متوسط نسبة الحضور</div>
+                    <div class="attendance-rate-bar"><div class="attendance-rate-fill" style="width:${avgRate}%"></div></div>
+                </div>
+            `;
+
+            const tbody = document.getElementById('sessionLogBody');
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" style="padding:50px;text-align:center;color:#aaa;font-size:16px;">📋 لا توجد سجلات مطابقة للفلتر المحدد</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = records.map((r, idx) => {
+                const present = r.students.filter(s => s.status === 'present').length;
+                const absent  = r.students.filter(s => s.status === 'absent').length;
+                const total   = r.students.length;
+                const rate    = total > 0 ? Math.round((present / total) * 100) : 0;
+                const rateColor = rate >= 80 ? '#28a745' : rate >= 50 ? '#ffc107' : '#dc3545';
+
+                // Format date
+                const dp = r.saveDate ? r.saveDate.split('-') : ['--','--','--'];
+                const dateStr = `${dp[2]}/${dp[1]}/${dp[0]}`;
+
+                // Format time
+                let timeStr = '--:--';
+                if (r.saveTime) {
+                    const tp = r.saveTime.split(':');
+                    const h = parseInt(tp[0]);
+                    const m = tp[1];
+                    const p = h >= 17 ? 'م' : h >= 12 ? 'ظ' : 'ص';
+                    timeStr = `${h > 12 ? h-12 : h}:${m} ${p}`;
+                }
+
+                const rowBg = idx % 2 === 0 ? '#ffffff' : '#fafafa';
+
+                return `
+                <tr style="background:${rowBg};">
+                    <td style="padding:12px 16px; font-weight:600; color:#333;">
+                        <span style="display:block;">${dateStr}</span>
+                        <span style="font-size:11px;color:#888;">${r.day || ''}</span>
+                    </td>
+                    <td style="padding:12px 16px;">
+                        <span style="font-weight:600;color:#667eea;">${r.subject || '--'}</span>
+                    </td>
+                    <td style="padding:12px 16px; color:#555;">${r.class || '--'}</td>
+                    <td style="padding:12px 16px; color:#555;">${r.teacher || '--'}</td>
+                    <td style="padding:12px 16px; color:#555; font-size:13px;">${r.time || '--'}<br><span style="color:#888;font-size:11px;">حُفظ: ${timeStr}</span></td>
+                    <td style="padding:12px 16px; text-align:center;">
+                        <span style="background:#d4edda;color:#155724;padding:4px 12px;border-radius:20px;font-weight:bold;font-size:13px;">${present}</span>
+                    </td>
+                    <td style="padding:12px 16px; text-align:center;">
+                        <span style="background:#f8d7da;color:#721c24;padding:4px 12px;border-radius:20px;font-weight:bold;font-size:13px;">${absent}</span>
+                    </td>
+                    <td style="padding:12px 16px; text-align:center; font-weight:bold;">${total}</td>
+                    <td style="padding:12px 16px; text-align:center;">
+                        <span style="color:${rateColor};font-weight:bold;font-size:15px;">${rate}%</span>
+                        <div class="attendance-rate-bar" style="width:80px;margin:4px auto 0;">
+                            <div class="attendance-rate-fill" style="width:${rate}%;background:${rateColor};"></div>
+                        </div>
+                    </td>
+                    <td style="padding:12px 16px; text-align:center;">
+                        <button onclick="showLogDetail('${r.recordId}')" 
+                            style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold;">
+                            👁 عرض
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function showLogDetail(recordId) {
+            const snap = await userCol('attendanceHistory').doc(recordId).get();
+            const r = snap.exists ? snap.data() : null;
+            if (!r) return;
+
+            const dp = r.saveDate ? r.saveDate.split('-') : ['--','--','--'];
+            const dateStr = `${dp[2]}/${dp[1]}/${dp[0]}`;
+
+            const present = r.students.filter(s => s.status === 'present');
+            const absent  = r.students.filter(s => s.status === 'absent');
+            const total   = r.students.length;
+            const rate    = total > 0 ? Math.round((present.length / total) * 100) : 0;
+
+            document.getElementById('logDetailTitle').textContent =
+                `📋 ${r.subject} — ${r.class} (${dateStr})`;
+
+            document.getElementById('logDetailContent').innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                    <div style="background:#d4edda;border-radius:10px;padding:14px;text-align:center;">
+                        <div style="font-size:24px;font-weight:bold;color:#155724;">${present.length}</div>
+                        <div style="font-size:12px;color:#155724;">حاضر ✅</div>
+                    </div>
+                    <div style="background:#f8d7da;border-radius:10px;padding:14px;text-align:center;">
+                        <div style="font-size:24px;font-weight:bold;color:#721c24;">${absent.length}</div>
+                        <div style="font-size:12px;color:#721c24;">غائب ❌</div>
+                    </div>
+                    <div style="background:#e3f2fd;border-radius:10px;padding:14px;text-align:center;">
+                        <div style="font-size:24px;font-weight:bold;color:#1565c0;">${rate}%</div>
+                        <div style="font-size:12px;color:#1565c0;">نسبة الحضور</div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:8px;font-size:13px;color:#666;">
+                    👨‍🏫 ${r.teacher || '--'} &nbsp;|&nbsp; 🏫 قاعة ${r.room || '--'} &nbsp;|&nbsp; 🕐 ${r.time || '--'}
+                </div>
+
+                <h3 style="color:#28a745;margin:18px 0 10px;font-size:16px;">✅ الطلاب الحاضرون (${present.length})</h3>
+                ${present.length === 0 ? '<p style="color:#999;padding:12px;background:#f8f9fa;border-radius:8px;text-align:center;">لا يوجد طلاب حاضرون</p>' :
+                    present.map(s => {
+                        const initials = s.name.split(' ').slice(0,2).map(n => n[0]).join('');
+                        return `<div class="log-detail-student" style="background:#d4edda;">
+                            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#28a745,#20c997);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;flex-shrink:0;">${initials}</div>
+                            <span style="font-weight:600;color:#155724;">${s.name}</span>
+                            ${s.fingerprintAt ? `<span style="margin-right:auto;font-size:11px;background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:12px;">🖐️ ${s.fingerprintAt}</span>` : ''}
+                        </div>`;
+                    }).join('')}
+
+                <h3 style="color:#dc3545;margin:18px 0 10px;font-size:16px;">❌ الطلاب الغائبون (${absent.length})</h3>
+                ${absent.length === 0 ? '<p style="color:#999;padding:12px;background:#f8f9fa;border-radius:8px;text-align:center;">لا يوجد طلاب غائبون</p>' :
+                    absent.map(s => {
+                        const initials = s.name.split(' ').slice(0,2).map(n => n[0]).join('');
+                        return `<div class="log-detail-student" style="background:#f8d7da;">
+                            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#dc3545,#c82333);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:14px;flex-shrink:0;">${initials}</div>
+                            <span style="font-weight:600;color:#721c24;">${s.name}</span>
+                        </div>`;
+                    }).join('')}
+            `;
+
+            document.getElementById('sessionLogDetailModal').classList.add('active');
+        }
+
+        async function exportLogToCSV() {
+            const snap = await userCol('attendanceHistory').get();
+            const history = [];
+            snap.forEach(doc => history.push(doc.data()));
+
+            const dateFrom = document.getElementById('logDateFrom').value;
+            const dateTo   = document.getElementById('logDateTo').value;
+            const subjectF = document.getElementById('logSubjectFilter').value;
+            const dayF     = document.getElementById('logDayFilter').value;
+
+            let records = history.filter(r => !r.isVirtual);
+            if (dateFrom) records = records.filter(r => r.saveDate >= dateFrom);
+            if (dateTo)   records = records.filter(r => r.saveDate <= dateTo);
+            if (subjectF) records = records.filter(r => r.subject === subjectF);
+            if (dayF)     records = records.filter(r => r.day === dayF);
+            records.sort((a,b) => b.saveDate.localeCompare(a.saveDate));
+
+            let csv = '\uFEFF'; // BOM for Arabic
+            csv += 'التاريخ,اليوم,الحصة,الفصل,المدرس,وقت الحصة,حاضر,غائب,الإجمالي,نسبة الحضور%\n';
+            records.forEach(r => {
+                const present = r.students.filter(s => s.status === 'present').length;
+                const absent  = r.students.filter(s => s.status === 'absent').length;
+                const total   = r.students.length;
+                const rate    = total > 0 ? Math.round((present/total)*100) : 0;
+                csv += `${r.saveDate},${r.day||''},${r.subject||''},${r.class||''},${r.teacher||''},${r.time||''},${present},${absent},${total},${rate}%\n`;
+            });
+
+            const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url;
+            a.download = `سجل_الحصص_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ── Override backToSessions to also hide sessionLogContainer ──
+        const _origBackToSessions = backToSessions;
+        backToSessions = function() {
+            document.getElementById('sessionLogContainer').style.display = 'none';
+            _origBackToSessions();
+        };
+
+        // ══════════════════════════════════════════════════
+
+        // ══════════════════════════════════════════════════
+
+        const BRIDGE_URL   = 'http://localhost:5000';
+        const POLL_MS      = 2500;   // كل كم ms نسأل البريدج عن بصمات جديدة
+        let   lastEventTs  = '';     // آخر timestamp قرأناه
+        let   bridgeOnline = false;
+        let   pollTimer    = null;
+        let   fpLogRows    = [];
+
+        // ─── كود-اسم mapping (Firebase) ───────────────────────────
+        // loadMappings / saveMappings already defined in auth script (async)
+
+        async function updateMappingCount() {
+            const map = await loadMappings();
+            const n = Object.keys(map).length;
+            const el = document.getElementById('mappingCount');
+            if (el) el.textContent = n > 0 ? `(${n} طالب مربوط)` : '(لا يوجد ربط بعد)';
+        }
+
+        // ─── Bridge status UI ──────────────────────────
+        function setBridgeState(state, msg) {
+            bridgeOnline = state === 'connected';
+            const bar  = document.getElementById('bridgeBar');
+            const dot  = document.getElementById('bridgeDot');
+            const msgEl= document.getElementById('bridgeMsg');
+            if (!bar) return;
+            bar.className  = 'bridge-bar ' + state;
+            dot.className  = 'bridge-dot ' + state;
+            msgEl.textContent = msg;
+        }
+
+        // ─── Polling loop ──────────────────────────────
+        async function pollBridge() {
+            try {
+                const res = await fetch(`${BRIDGE_URL}/events/since?since=${encodeURIComponent(lastEventTs)}`, {signal: AbortSignal.timeout(2000)});
+                if (!res.ok) throw new Error('bad response');
+                const data = await res.json();
+                setBridgeState('connected', '✅ جهاز ZKTeco متصل ويعمل');
+
+                if (data.events && data.events.length > 0) {
+                    data.events.forEach(ev => processEvent(ev));
+                    // update last timestamp
+                    const latest = data.events.reduce((a,b) => a.timestamp > b.timestamp ? a : b);
+                    lastEventTs = latest.timestamp;
+                }
+            } catch(e) {
+                setBridgeState('disconnected', '❌ جهاز البصمة غير متصل — تأكد من تشغيل bridge.py');
+            }
+            pollTimer = setTimeout(pollBridge, POLL_MS);
+        }
+
+        async function retryBridgeConnect() {
+            setBridgeState('connecting', '🔌 جاري إعادة الاتصال...');
+            clearTimeout(pollTimer);
+            lastEventTs = '';
+            pollBridge();
+        }
+
+        // ─── Process a fingerprint event ──────────────
+        async function processEvent(ev) {
+            if (!currentSessionId) return;   // مفيش حصة مفتوحة
+
+            const map = await loadMappings();
+            const studentName = map[String(ev.user_id)];
+            const timeShort   = ev.time ? ev.time.slice(0,5) : '';
+
+            if (!studentName) {
+                // كود غير مربوط
+                addFpLogRow(`❓ كود غير معروف: ${ev.user_id}`, timeShort, 'notfound');
+                return;
+            }
+
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session) return;
+
+            // ابحث عن الطالب بالاسم (مطابقة جزئية)
+            const student = session.students.find(s =>
+                s.name.trim() === studentName.trim() ||
+                s.name.includes(studentName) ||
+                studentName.includes(s.name)
+            );
+
+            if (!student) {
+                addFpLogRow(`⚠️ ${studentName} — غير موجود في قائمة هذه الحصة`, timeShort, 'notfound');
+                return;
+            }
+
+            // سجّل الحضور
+            student.status        = 'present';
+            student.fingerprintAt = timeShort;
+            if (!window._fbAttMap) window._fbAttMap = {};
+            const session2 = sessions.find(s => s.id === currentSessionId);
+            if (session2) {
+                window._fbAttMap[session2.id] = session2;
+                userCol('attendanceSessions').doc(String(session2.id)).set(session2);
+            }
+            renderStudents();
+            updateSummary();
+
+            addFpLogRow(`✅ ${studentName}`, timeShort, 'present');
+            showAlert(`✅ تم تسجيل حضور: ${studentName} عبر البصمة`, 'success');
+        }
+
+        function addFpLogRow(text, time, type) {
+            fpLogRows.unshift({text, time, type});
+            if (fpLogRows.length > 50) fpLogRows.pop();
+            renderFpLog();
+        }
+
+        function renderFpLog() {
+            const log = document.getElementById('fpLog');
+            if (!log) return;
+            if (fpLogRows.length === 0) {
+                log.innerHTML = '<p style="color:#999;text-align:center;padding:10px;">في انتظار بصمة الطلاب...</p>';
+                return;
+            }
+            log.innerHTML = fpLogRows.map(r => `
+                <div class="fp-log-row ${r.type}">
+                    <span>${r.text}</span>
+                    <span style="font-size:11px;color:#888;">${r.time}</span>
+                </div>
+            `).join('');
+        }
+
+        // ─── Code Mapping Modal ────────────────────────
+        function showCodeMapModal() {
+            renderCodeMapList();
+            document.getElementById('codeMapModal').classList.add('active');
+        }
+
+        async function renderCodeMapList() {
+            const map  = await loadMappings();
+            const list = document.getElementById('codeMapList');
+            const entries = Object.entries(map);
+            if (entries.length === 0) {
+                list.innerHTML = '<p style="color:#999;text-align:center;padding:15px;">لا يوجد ربط بعد. أضف الأكواد أدناه.</p>';
+                return;
+            }
+            list.innerHTML = `
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead><tr style="background:#f0f0f0;">
+                        <th style="padding:8px;text-align:right;border-radius:6px 0 0 0;">كود الجهاز</th>
+                        <th style="padding:8px;text-align:right;">اسم الطالب</th>
+                        <th style="padding:8px;width:60px;border-radius:0 6px 0 0;"></th>
+                    </tr></thead>
+                    <tbody>${entries.map(([code, name]) => `
+                        <tr style="border-bottom:1px solid #eee;">
+                            <td style="padding:8px;font-weight:bold;color:#1565c0;">${code}</td>
+                            <td style="padding:8px;">${name}</td>
+                            <td style="padding:8px;text-align:center;">
+                                <button onclick="deleteMapping('${code}')" style="background:#dc3545;color:white;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;">✕</button>
+                            </td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        async function addCodeMapping() {
+            const code = document.getElementById('codeInput').value.trim();
+            const name = document.getElementById('codeNameInput').value.trim();
+            if (!code || !name) { alert('أدخل الكود والاسم'); return; }
+            const map = await loadMappings();
+            map[code] = name;
+            await saveMappings(map);
+            document.getElementById('codeInput').value = '';
+            document.getElementById('codeNameInput').value = '';
+            renderCodeMapList();
+            showAlert(`✅ تم ربط الكود ${code} بالطالب: ${name}`);
+        }
+
+        async function deleteMapping(code) {
+            if (!confirm(`هل تريد حذف ربط الكود ${code}؟`)) return;
+            const map = await loadMappings();
+            delete map[code];
+            await saveMappings(map);
+            renderCodeMapList();
+        }
+
+        async function clearAllMappings() {
+            if (!confirm('هل تريد حذف كل الأكواد؟')) return;
+            await saveMappings({});
+            renderCodeMapList();
+        }
+
+        async function importCodesFromStudents() {
+            if (!currentSessionId) { alert('افتح حصة أولاً لاستيراد طلابها'); return; }
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (!session || session.students.length === 0) { alert('لا يوجد طلاب في هذه الحصة'); return; }
+            const map = await loadMappings();
+            let added = 0;
+            session.students.forEach((st, idx) => {
+                const code = String(idx + 1);
+                if (!map[code]) { map[code] = st.name; added++; }
+            });
+            await saveMappings(map);
+            renderCodeMapList();
+            showAlert(`✅ تم استيراد ${added} طالب — راجع الأكواد وعدّلها حسب جهازك`);
+        }
+
+        // ─── Start polling when session opens ─────────
+        const _origOpenAttendance = openAttendance;
+        openAttendance = function(sessionId) {
+            _origOpenAttendance(sessionId);
+            fpLogRows = [];
+            renderFpLog();
+            updateMappingCount();
+            if (!pollTimer) pollBridge();
+        };
+
+        // ── تشغيل التطبيق مباشرة ──
+        _startApp();
+    </script>
+</body>
+</html>
