@@ -404,7 +404,8 @@
                             <th>المواد</th>
                             <th>تاريخ الميلاد</th>
                             <th>السن</th>
-                            <th>رقم الهاتف</th>
+                            <th>رقم الطالب</th>
+                            <th>رقم ولي الأمر</th>
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
@@ -497,8 +498,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label>رقم الهاتف *</label>
+                    <label>رقم الطالب *</label>
                     <input type="tel" id="studentPhone" required placeholder="01xxxxxxxxx" pattern="[0-9]{11}">
+                </div>
+
+                <div class="form-group">
+                    <label>رقم ولي الأمر</label>
+                    <input type="tel" id="parentPhone" placeholder="01xxxxxxxxx" pattern="[0-9]{11}">
                 </div>
 
                 <div class="form-group">
@@ -644,6 +650,7 @@
                     <td>${new Date(student.birthdate).toLocaleDateString('ar-EG')}</td>
                     <td>${student.age}</td>
                     <td>${student.phone}</td>
+                    <td>${student.parentPhone || '-'}</td>
                     <td class="action-btns">
                         <button class="edit-btn" onclick="editStudent('${student.id}')">✏️ تعديل</button>
                         <button class="delete-btn" onclick="deleteStudent('${student.id}')">🗑️ حذف</button>
@@ -687,6 +694,7 @@
             document.getElementById('studentBirthdate').value = student.birthdate;
             document.getElementById('studentAge').value       = student.age;
             document.getElementById('studentPhone').value     = student.phone;
+            document.getElementById('parentPhone').value      = student.parentPhone || '';
             document.getElementById('studentAddress').value   = student.address || '';
             document.getElementById('studentNotes').value     = student.notes || '';
 
@@ -727,6 +735,7 @@
                 birthdate: document.getElementById('studentBirthdate').value,
                 age:       document.getElementById('studentAge').value,
                 phone:     document.getElementById('studentPhone').value,
+                parentPhone: document.getElementById('parentPhone').value,
                 address:   document.getElementById('studentAddress').value,
                 notes:     document.getElementById('studentNotes').value,
                 createdAt: editingStudentId
