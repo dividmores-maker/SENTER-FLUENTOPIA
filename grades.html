@@ -5,22 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الدرجات والامتحانات</title>
 
-    <!-- Firebase compat SDK — exact same as attendance.html -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAZCGljrXbTP38-MZwzsxOZ8HK34Fykk8o",
-            authDomain: "senter-4e169.firebaseapp.com",
-            projectId: "senter-4e169",
-            storageBucket: "senter-4e169.firebasestorage.app",
-            messagingSenderId: "235178743750",
-            appId: "1:235178743750:web:e4419cfea51a404f2e44c7"
-        };
+  apiKey: "AIzaSyAhBzD1tqxDhqpCklLUXh2LxHTI-lZgPbg",
+  authDomain: "al-gnarl.firebaseapp.com",
+  projectId: "al-gnarl",
+  storageBucket: "al-gnarl.firebasestorage.app",
+  messagingSenderId: "288765966471",
+  appId: "1:288765966471:web:63358febfb82843c2fa022"
+};
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        /* ---------- same helpers as attendance.html ---------- */
         function userCol(c) {
             return db.collection('attendance_data').doc('default_user').collection(c);
         }
@@ -29,355 +26,376 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* ══════════════════════════════════════════
-           VARIABLES
-        ══════════════════════════════════════════ */
+        /* ══ VARIABLES ══════════════════════════════════ */
         :root {
-            --navy:    #1a2e5a;
-            --navy2:   #253f7a;
-            --gold:    #d4a017;
-            --gold2:   #f0c040;
-            --green:   #1e7e4a;
-            --red:     #b91c1c;
-            --blue:    #1d4ed8;
-            --orange:  #c2410c;
-            --bg:      #eef1f8;
-            --card:    #ffffff;
-            --border:  #dde4f0;
-            --text:    #1e293b;
-            --muted:   #64748b;
-            --shadow:  0 2px 18px rgba(26,46,90,.09);
-            --r:       14px;
+            --purple-deep:   #080808;
+            --purple-mid:    #110a00;
+            --purple-bright: #c0182a;
+            --purple-glow:   #d4a017;
+            --purple-light:  #f5c842;
+            --blue-accent:   #e8c96a;
+            --white:         #ffffff;
+            --glass-bg:      rgba(255,255,255,0.04);
+            --glass-border:  rgba(212,160,23,0.2);
+            --card-bg:       rgba(20,10,0,0.65);
+            --muted:         rgba(255,255,255,0.45);
+            --text:          rgba(255,255,255,0.85);
         }
 
         * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
             font-family: 'Cairo', sans-serif;
-            background: var(--bg);
+            background: var(--purple-deep);
             min-height: 100vh;
             color: var(--text);
         }
 
-        /* ══ TOPBAR ════════════════════════════════ */
+        /* ── Background ─────────────────────────────── */
+        .bg-layer { position:fixed; inset:0; z-index:0; pointer-events:none; }
+        .bg-gradient {
+            position:absolute; inset:0;
+            background:
+                radial-gradient(ellipse 75% 55% at 50% -5%,  rgba(212,160,23,.38) 0%, transparent 62%),
+                radial-gradient(ellipse 55% 45% at 85% 85%,  rgba(192,24,42,.28)  0%, transparent 55%),
+                radial-gradient(ellipse 45% 38% at 20% 70%,  rgba(212,160,23,.16) 0%, transparent 50%),
+                radial-gradient(ellipse 30% 28% at 75% 10%,  rgba(192,24,42,.12)  0%, transparent 48%),
+                linear-gradient(160deg, #0d0900 0%, #110a00 40%, #080808 70%, #0d0203 100%);
+        }
+        .grid-lines {
+            position:absolute; inset:0;
+            background-image:
+                linear-gradient(rgba(212,160,23,.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212,160,23,.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .dot-grid {
+            position:absolute; inset:0;
+            background-image: radial-gradient(rgba(212,160,23,.13) 1px, transparent 1px);
+            background-size: 30px 30px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+        }
+        .orb { position:absolute; border-radius:50%; filter:blur(80px); animation:floatOrb 8s ease-in-out infinite; }
+        .orb-1 { width:420px; height:420px; background:rgba(212,160,23,.22); top:-110px; left:50%; transform:translateX(-50%); }
+        .orb-2 { width:300px; height:300px; background:rgba(192,24,42,.2);   bottom:10%; right:-50px; animation-delay:-3s; }
+        .orb-3 { width:250px; height:250px; background:rgba(212,160,23,.12); bottom:20%; left:-30px; animation-delay:-5s; }
+        @keyframes floatOrb {
+            0%,100% { transform:translateY(0) translateX(0); }
+            33%     { transform:translateY(-20px) translateX(10px); }
+            66%     { transform:translateY(10px)  translateX(-10px); }
+        }
+
+        /* Particles */
+        .particles { position:fixed; inset:0; z-index:1; pointer-events:none; }
+        .particle  { position:absolute; width:3px; height:3px; border-radius:50%; background:var(--purple-light); animation:floatParticle linear infinite; opacity:0; }
+        @keyframes floatParticle {
+            0%   { transform:translateY(100vh) translateX(0); opacity:0; }
+            10%  { opacity:.5; }
+            90%  { opacity:.3; }
+            100% { transform:translateY(-10vh) translateX(30px); opacity:0; }
+        }
+
+        /* ══ TOPBAR ═════════════════════════════════════ */
         .topbar {
-            background: linear-gradient(120deg, var(--navy) 0%, var(--navy2) 100%);
+            position: sticky; top:0; z-index:200;
+            background: rgba(8,4,0,.88);
+            border-bottom: 1px solid rgba(212,160,23,.25);
+            backdrop-filter: blur(20px);
             height: 66px;
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
             justify-content: space-between;
             padding: 0 26px;
-            position: sticky;
-            top: 0;
-            z-index: 200;
-            box-shadow: 0 3px 24px rgba(26,46,90,.45);
+            box-shadow: 0 4px 24px rgba(0,0,0,.5);
         }
-
         .tb-brand { display:flex; align-items:center; gap:13px; }
-
         .tb-icon {
             width:44px; height:44px; border-radius:12px;
-            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            background: linear-gradient(135deg, #c0182a, #d4a017);
             display:flex; align-items:center; justify-content:center;
-            font-size:22px;
-            box-shadow: 0 4px 14px rgba(212,160,23,.5);
-            flex-shrink:0;
+            font-size:22px; flex-shrink:0;
+            box-shadow: 0 4px 14px rgba(192,24,42,.5);
         }
-
-        .tb-title { color:white; font-size:19px; font-weight:900; font-family:'Tajawal',sans-serif; }
-        .tb-sub   { color:rgba(255,255,255,.6); font-size:11px; }
-
+        .tb-title { color:var(--white); font-size:19px; font-weight:900; font-family:'Tajawal',sans-serif; }
+        .tb-sub   { color:var(--muted); font-size:11px; }
         .tb-actions { display:flex; gap:9px; align-items:center; }
 
-        /* ══ BUTTONS ═══════════════════════════════ */
+        /* ══ BUTTONS ════════════════════════════════════ */
         .btn {
             display:inline-flex; align-items:center; gap:6px;
             padding:9px 18px; border:none; border-radius:9px;
             font-family:'Cairo',sans-serif; font-size:13px; font-weight:700;
             cursor:pointer; transition:all .22s; text-decoration:none;
         }
-        .btn-navy   { background:linear-gradient(135deg,var(--navy),var(--navy2)); color:white; box-shadow:0 3px 12px rgba(26,46,90,.35); }
-        .btn-navy:hover   { transform:translateY(-2px); box-shadow:0 6px 18px rgba(26,46,90,.45); }
-        .btn-gold   { background:linear-gradient(135deg,var(--gold),var(--gold2)); color:var(--navy); box-shadow:0 3px 12px rgba(212,160,23,.4); }
-        .btn-gold:hover   { transform:translateY(-2px); box-shadow:0 6px 18px rgba(212,160,23,.5); }
-        .btn-green  { background:linear-gradient(135deg,var(--green),#26a35f); color:white; box-shadow:0 3px 12px rgba(30,126,74,.35); }
-        .btn-green:hover  { transform:translateY(-2px); }
-        .btn-red    { background:linear-gradient(135deg,var(--red),#dc2626); color:white; box-shadow:0 3px 12px rgba(185,28,28,.35); }
-        .btn-red:hover    { transform:translateY(-2px); }
-        .btn-ghost  { background:#e8edf5; color:var(--navy2); }
-        .btn-ghost:hover  { background:#d4dbe8; transform:translateY(-2px); }
+        .btn-navy {
+            background: linear-gradient(135deg, #c0182a, #d4a017);
+            color: white; box-shadow: 0 3px 14px rgba(192,24,42,.5);
+        }
+        .btn-navy:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(212,160,23,.7); }
+
+        .btn-gold {
+            background: linear-gradient(135deg,#f59e0b,#d97706);
+            color: #fff; box-shadow:0 3px 12px rgba(245,158,11,.4);
+        }
+        .btn-gold:hover  { transform:translateY(-2px); box-shadow:0 6px 18px rgba(245,158,11,.6); }
+
+        .btn-green {
+            background: linear-gradient(135deg,#10b981,#059669);
+            color: white; box-shadow:0 3px 12px rgba(16,185,129,.4);
+        }
+        .btn-green:hover { transform:translateY(-2px); }
+
+        .btn-red {
+            background: linear-gradient(135deg,#ef4444,#dc2626);
+            color: white; box-shadow:0 3px 12px rgba(239,68,68,.35);
+        }
+        .btn-red:hover   { transform:translateY(-2px); }
+
+        .btn-ghost {
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.12);
+            color: rgba(255,255,255,.75);
+        }
+        .btn-ghost:hover { background:rgba(255,255,255,.13); transform:translateY(-2px); }
+
+        .btn-outline {
+            background: rgba(255,255,255,.08);
+            border: 1.5px solid rgba(212,160,23,.4);
+            color: var(--purple-light);
+        }
+        .btn-outline:hover { background:rgba(212,160,23,.15); }
+
         .btn-sm { padding:7px 14px; font-size:13px; }
         .btn-xs { padding:5px 11px; font-size:12px; border-radius:7px; }
-        .btn-outline { background:rgba(255,255,255,.14); color:white; border:1.5px solid rgba(255,255,255,.3); }
-        .btn-outline:hover { background:rgba(255,255,255,.24); }
 
-        /* ══ CONTAINER ═════════════════════════════ */
-        .wrap { max-width:1480px; margin:0 auto; padding:24px 22px; }
+        /* ══ LAYOUT ═════════════════════════════════════ */
+        .wrap { max-width:1480px; margin:0 auto; padding:24px 22px; position:relative; z-index:10; }
 
-        /* ══ STATUS BAR ════════════════════════════ */
+        /* ══ STATUS BAR ═════════════════════════════════ */
         .status-bar {
             display:flex; align-items:center; gap:10px;
-            padding:10px 16px; border-radius:10px;
+            padding:10px 16px; border-radius:12px;
             font-size:13px; font-weight:700;
             margin-bottom:22px; transition:all .3s;
+            backdrop-filter: blur(10px);
         }
-        .status-bar.connecting { background:#fef9c3; color:#854d0e; border:2px solid #fde047; }
-        .status-bar.connected  { background:#f0fdf4; color:#166534; border:2px solid #86efac; }
-        .status-bar.error      { background:#fef2f2; color:#991b1b; border:2px solid #fca5a5; }
-        .status-bar.saving     { background:#eff6ff; color:#1e40af; border:2px solid #93c5fd; }
+        .status-bar.connecting { background:rgba(245,158,11,.1);  color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+        .status-bar.connected  { background:rgba(16,185,129,.1);  color:#34d399; border:1px solid rgba(16,185,129,.3); }
+        .status-bar.error      { background:rgba(239,68,68,.1);   color:#f87171; border:1px solid rgba(239,68,68,.3); }
+        .status-bar.saving     { background:rgba(59,130,246,.1);  color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
         .s-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-        .s-dot.connecting { background:#eab308; animation:sblink .6s infinite; }
-        .s-dot.connected  { background:#22c55e; animation:sblink 2s infinite; }
-        .s-dot.error      { background:#ef4444; }
-        .s-dot.saving     { background:#3b82f6; animation:sblink .4s infinite; }
+        .s-dot.connecting { background:#fbbf24; animation:sblink .6s infinite; }
+        .s-dot.connected  { background:#34d399; animation:sblink 2s infinite; }
+        .s-dot.error      { background:#f87171; }
+        .s-dot.saving     { background:#60a5fa; animation:sblink .4s infinite; }
         @keyframes sblink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-        /* ══ STATS ROW ═════════════════════════════ */
+        /* ══ STATS ROW ══════════════════════════════════ */
         .stats-row {
             display:grid;
             grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
-            gap:15px; margin-bottom:24px;
+            gap:14px; margin-bottom:24px;
         }
         .sc {
-            background:var(--card); border-radius:var(--r);
-            padding:18px 16px; box-shadow:var(--shadow);
-            border-top:4px solid var(--gold);
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            border-radius:14px; padding:18px 16px;
+            border-top:3px solid var(--purple-glow);
+            box-shadow:0 4px 20px rgba(0,0,0,.3);
             transition:transform .2s;
         }
         .sc:hover { transform:translateY(-3px); }
-        .sc.g  { border-top-color:#22c55e; }
-        .sc.b  { border-top-color:#3b82f6; }
-        .sc.r  { border-top-color:#ef4444; }
-        .sc.t  { border-top-color:#0d9488; }
-        .sc-n  { font-size:32px; font-weight:900; font-family:'Tajawal',sans-serif; color:var(--navy); }
-        .sc-l  { font-size:12px; color:var(--muted); margin-top:3px; }
+        .sc.g { border-top-color:#34d399; }
+        .sc.b { border-top-color:#60a5fa; }
+        .sc.r { border-top-color:#f87171; }
+        .sc.t { border-top-color:#2dd4bf; }
+        .sc-n {
+            font-size:30px; font-weight:900; font-family:'Tajawal',sans-serif;
+            background: linear-gradient(135deg, #f5c842, #d4a017);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .sc.g .sc-n { background:linear-gradient(135deg,#34d399,#10b981); -webkit-background-clip:text; background-clip:text; }
+        .sc.b .sc-n { background:linear-gradient(135deg,#60a5fa,#3b82f6); -webkit-background-clip:text; background-clip:text; }
+        .sc.r .sc-n { background:linear-gradient(135deg,#f87171,#ef4444); -webkit-background-clip:text; background-clip:text; }
+        .sc.t .sc-n { background:linear-gradient(135deg,#2dd4bf,#0d9488); -webkit-background-clip:text; background-clip:text; }
+        .sc-l { font-size:12px; color:var(--muted); margin-top:4px; }
 
-        /* ══ SECTION VISIBILITY ════════════════════ */
+        /* ══ SECTION ════════════════════════════════════ */
         .section { display:none; }
         .section.active { display:block; }
 
-        /* ══ BREADCRUMB ════════════════════════════ */
-        .bc {
-            display:flex; align-items:center; gap:7px;
-            font-size:13px; color:var(--muted); margin-bottom:18px;
-        }
-        .bc a { color:var(--navy2); font-weight:700; cursor:pointer; }
+        /* ══ BREADCRUMB ═════════════════════════════════ */
+        .bc { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); margin-bottom:18px; }
+        .bc a { color:var(--purple-light); font-weight:700; cursor:pointer; }
         .bc a:hover { text-decoration:underline; }
+        .bc span { color:var(--muted); }
 
-        /* ══ SECTION HEADER ════════════════════════ */
+        /* ══ SECTION HEADER ═════════════════════════════ */
         .sec-hd {
-            background:var(--card); border-radius:var(--r);
-            padding:18px 22px; margin-bottom:20px;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(14px);
+            border-radius:16px; padding:18px 22px; margin-bottom:20px;
             display:flex; align-items:center; justify-content:space-between;
             flex-wrap:wrap; gap:12px;
-            box-shadow:var(--shadow);
+            box-shadow:0 4px 20px rgba(0,0,0,.3);
         }
-        .sec-title { font-size:20px; font-weight:900; color:var(--navy); font-family:'Tajawal',sans-serif; }
-        .sec-sub   { font-size:12px; color:var(--muted); margin-top:2px; }
+        .sec-title {
+            font-size:20px; font-weight:900; font-family:'Tajawal',sans-serif;
+            background: linear-gradient(135deg, var(--white), #f5c842);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .sec-sub { font-size:12px; color:var(--muted); margin-top:3px; }
 
-        /* ══ SEARCH BAR ════════════════════════════ */
+        /* ══ SEARCH BAR ═════════════════════════════════ */
         .search-row { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:18px; }
         .si {
             flex:1; min-width:200px; padding:10px 14px;
-            border:2px solid var(--border); border-radius:9px;
-            font-family:'Cairo',sans-serif; font-size:13px; color:var(--text);
-            transition:border-color .2s;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(212,160,23,.2);
+            border-radius:10px; font-family:'Cairo',sans-serif; font-size:13px; color:var(--white);
+            outline:none; transition:border-color .2s, box-shadow .2s;
         }
-        .si:focus { outline:none; border-color:var(--navy2); }
+        .si::placeholder { color:var(--muted); }
+        .si:focus { border-color:var(--purple-glow); box-shadow:0 0 0 3px rgba(212,160,23,.2); }
 
-        /* ══ SESSIONS GRID ═════════════════════════ */
-        .sessions-grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(285px,1fr));
-            gap:17px;
-        }
-
+        /* ══ SESSIONS GRID ══════════════════════════════ */
+        .sessions-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(285px,1fr)); gap:17px; }
         .sess-card {
-            background:var(--card); border-radius:var(--r);
-            padding:20px 18px;
-            box-shadow:var(--shadow);
-            border-right:5px solid var(--navy2);
-            cursor:pointer; transition:all .24s;
-            position:relative; overflow:hidden;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            border-radius:16px; padding:20px 18px;
+            box-shadow:0 4px 20px rgba(0,0,0,.3);
+            border-right:4px solid #c0182a;
+            cursor:pointer; transition:all .24s; position:relative; overflow:hidden;
         }
         .sess-card::after {
-            content:'';
-            position:absolute; bottom:0; left:0; right:0; height:3px;
-            background:linear-gradient(90deg,var(--gold),var(--gold2));
-            transform:scaleX(0); transform-origin:right;
-            transition:transform .3s;
+            content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+            background:linear-gradient(90deg, #d4a017, #f5c842);
+            transform:scaleX(0); transform-origin:right; transition:transform .3s;
         }
-        .sess-card:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(26,46,90,.13); }
+        .sess-card:hover { transform:translateY(-5px); box-shadow:0 12px 32px rgba(212,160,23,.2); border-color:rgba(212,160,23,.4); }
         .sess-card:hover::after { transform:scaleX(1); }
-
-        .sess-subject { font-size:18px; font-weight:900; color:var(--navy); font-family:'Tajawal',sans-serif; margin-bottom:9px; }
+        .sess-subject { font-size:17px; font-weight:900; color:var(--white); font-family:'Tajawal',sans-serif; margin-bottom:9px; }
         .sess-row { font-size:13px; color:var(--muted); margin-bottom:3px; display:flex; align-items:center; gap:5px; }
 
         .tag {
             display:inline-flex; align-items:center; gap:4px;
-            padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
-            margin-top:9px;
+            padding:3px 12px; border-radius:20px; font-size:11px; font-weight:700; margin-top:9px;
         }
-        .tag.ok     { background:#dcfce7; color:#166534; }
-        .tag.warn   { background:#fef9c3; color:#854d0e; }
-        .tag.danger { background:#fee2e2; color:#991b1b; }
+        .tag.ok     { background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.3); }
+        .tag.warn   { background:rgba(245,158,11,.12); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+        .tag.danger { background:rgba(239,68,68,.12);  color:#f87171; border:1px solid rgba(239,68,68,.3); }
 
-        /* ══ EXAMS LIST ════════════════════════════ */
+        /* ══ EXAMS LIST ═════════════════════════════════ */
         .exams-list { display:flex; flex-direction:column; gap:13px; margin-bottom:22px; }
-
         .exam-row {
-            background:var(--card); border-radius:var(--r);
-            padding:16px 20px;
-            box-shadow:var(--shadow);
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            border-radius:14px; padding:16px 20px;
+            box-shadow:0 4px 16px rgba(0,0,0,.25);
             display:flex; align-items:center; gap:14px;
             cursor:pointer; transition:all .22s;
-            border-right:4px solid var(--gold);
+            border-right:3px solid #d4a017;
         }
-        .exam-row:hover { transform:translateX(-4px); box-shadow:0 5px 22px rgba(26,46,90,.12); }
-
+        .exam-row:hover { transform:translateX(-4px); box-shadow:0 6px 24px rgba(212,160,23,.2); border-color:rgba(212,160,23,.4); }
         .exam-ico {
             width:48px; height:48px; border-radius:12px; flex-shrink:0;
-            background:linear-gradient(135deg,var(--navy),var(--navy2));
+            background: linear-gradient(135deg, #c0182a, #d4a017);
             display:flex; align-items:center; justify-content:center; font-size:20px;
+            box-shadow:0 4px 12px rgba(192,24,42,.4);
         }
-        .exam-name { font-size:16px; font-weight:800; color:var(--navy); }
+        .exam-name { font-size:16px; font-weight:800; color:var(--white); }
         .exam-meta { font-size:12px; color:var(--muted); margin-top:3px; }
-
         .exam-prog { margin-right:auto; text-align:center; min-width:70px; }
         .exam-prog-n { font-size:18px; font-weight:900; font-family:'Tajawal',sans-serif; }
         .exam-prog-l { font-size:11px; color:var(--muted); }
 
-        /* ══ GRADE TABLE ═══════════════════════════ */
-        .tbl-wrap { background:var(--card); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow); }
-        .tbl-top  {
+        /* ══ GRADE TABLE ════════════════════════════════ */
+        .tbl-wrap {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(14px);
+            border-radius:16px; overflow:hidden;
+            box-shadow:0 6px 28px rgba(0,0,0,.35);
+        }
+        .tbl-top {
             padding:16px 20px;
-            background:linear-gradient(135deg,#f8faff,#eef2fb);
-            border-bottom:2px solid var(--border);
+            background: rgba(192,24,42,.1);
+            border-bottom:1px solid rgba(212,160,23,.15);
             display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
         }
-        .tbl-top-title { font-size:16px; font-weight:800; color:var(--navy); }
+        .tbl-top-title { font-size:16px; font-weight:800; color:var(--white); }
 
         table { width:100%; border-collapse:collapse; }
-        thead tr { background:linear-gradient(135deg,var(--navy),var(--navy2)); }
-        thead th { padding:12px 14px; text-align:right; color:white; font-size:13px; font-weight:700; }
-        tbody tr { border-bottom:1px solid var(--border); transition:background .14s; }
-        tbody tr:hover { background:#f7faff; }
+        thead tr { background:linear-gradient(135deg, rgba(192,24,42,.4), rgba(212,160,23,.25)); }
+        thead th { padding:12px 14px; text-align:right; color:#f5c842; font-size:13px; font-weight:700; }
+        tbody tr { border-bottom:1px solid rgba(212,160,23,.08); transition:background .14s; }
+        tbody tr:hover { background:rgba(212,160,23,.07); }
         tbody tr:last-child { border-bottom:none; }
-        tbody td { padding:11px 14px; font-size:14px; }
+        tbody td { padding:11px 14px; font-size:14px; color:var(--text); }
 
         .st-avatar {
             width:34px; height:34px; border-radius:9px;
-            background:linear-gradient(135deg,var(--navy),var(--navy2));
+            background:linear-gradient(135deg, #c0182a, #d4a017);
             display:flex; align-items:center; justify-content:center;
             color:white; font-size:12px; font-weight:800; flex-shrink:0;
+            box-shadow:0 2px 8px rgba(192,24,42,.4);
         }
-        .st-name { font-weight:800; color:var(--navy); }
+        .st-name { font-weight:800; color:var(--white); }
 
         /* Grade input */
         .gi {
             width:72px; padding:7px 8px;
-            border:2px solid var(--border); border-radius:8px;
+            background: rgba(255,255,255,.06);
+            border:1.5px solid rgba(212,160,23,.25); border-radius:8px;
             font-family:'Cairo',sans-serif; font-size:16px; font-weight:800;
-            text-align:center; direction:ltr; color:var(--navy);
-            background:#f8faff; transition:border-color .2s, box-shadow .2s;
+            text-align:center; direction:ltr; color:var(--white);
+            transition:border-color .2s, box-shadow .2s;
         }
-        .gi:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,160,23,.2); background:white; }
-        .gi.ok  { border-color:#22c55e; }
-        .gi.err { border-color:#ef4444; }
+        .gi:focus { outline:none; border-color:#d4a017; box-shadow:0 0 0 3px rgba(212,160,23,.25); background:rgba(255,255,255,.1); }
+        .gi.ok  { border-color:#34d399; }
+        .gi.err { border-color:#f87171; }
 
         /* Letter badge */
-        .ltr {
-            padding:4px 10px; border-radius:8px;
-            font-size:13px; font-weight:900; min-width:36px; text-align:center;
-            transition:all .3s;
-        }
-        .ltr.A { background:#dcfce7; color:#166534; }
-        .ltr.B { background:#dbeafe; color:#1e40af; }
-        .ltr.C { background:#fef9c3; color:#854d0e; }
-        .ltr.D { background:#fed7aa; color:#9a3412; }
-        .ltr.F { background:#fee2e2; color:#991b1b; }
-        .ltr.X { background:#f1f5f9; color:#94a3b8; }
+        .ltr { padding:4px 10px; border-radius:8px; font-size:13px; font-weight:900; min-width:36px; text-align:center; transition:all .3s; }
+        .ltr.A { background:rgba(16,185,129,.2);  color:#34d399; }
+        .ltr.B { background:rgba(59,130,246,.2);  color:#60a5fa; }
+        .ltr.C { background:rgba(245,158,11,.18); color:#fbbf24; }
+        .ltr.D { background:rgba(249,115,22,.18); color:#fb923c; }
+        .ltr.F { background:rgba(239,68,68,.18);  color:#f87171; }
+        .ltr.X { background:rgba(255,255,255,.06); color:var(--muted); }
 
         /* Percent mini bar */
         .pct-num  { font-size:14px; font-weight:800; }
-        .mini-bar { height:5px; background:#e2e8f0; border-radius:3px; margin-top:3px; overflow:hidden; min-width:70px; }
+        .mini-bar { height:5px; background:rgba(255,255,255,.1); border-radius:3px; margin-top:3px; overflow:hidden; min-width:70px; }
         .mini-fill { height:100%; border-radius:3px; transition:width .4s, background .4s; }
 
         /* Note input */
         .note-i {
-            padding:6px 10px; border:2px solid var(--border); border-radius:7px;
-            font-family:'Cairo',sans-serif; font-size:12px; color:var(--text);
-            background:#f8faff; width:100%; min-width:100px;
+            padding:6px 10px;
+            background:rgba(255,255,255,.05);
+            border:1.5px solid rgba(212,160,23,.2); border-radius:7px;
+            font-family:'Cairo',sans-serif; font-size:12px; color:var(--white);
+            width:100%; min-width:100px;
         }
-        .note-i:focus { outline:none; border-color:var(--navy2); background:white; }
-
-        /* Save indicator */
-        .save-ind { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#22c55e; font-weight:700; opacity:0; transition:opacity .3s; }
-        .save-ind.show { opacity:1; }
-
-        /* ══ MODAL ══════════════════════════════════ */
-        .ov {
-            display:none; position:fixed; inset:0;
-            background:rgba(26,46,90,.58); z-index:300;
-            justify-content:center; align-items:center;
-            backdrop-filter:blur(4px);
-        }
-        .ov.active { display:flex; }
-        .mb {
-            background:var(--card); border-radius:18px;
-            width:92%; max-width:520px; max-height:92vh; overflow-y:auto;
-            box-shadow:0 24px 64px rgba(26,46,90,.35);
-            animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
-        }
-        .mb.wide { max-width:660px; }
-        @keyframes popIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
-        .mh {
-            padding:20px 24px 15px;
-            border-bottom:2px solid var(--border);
-            display:flex; align-items:center; justify-content:space-between;
-        }
-        .mh-title { font-size:18px; font-weight:900; color:var(--navy); font-family:'Tajawal',sans-serif; }
-        .mc { padding:20px 24px; }
-        .mf { padding:14px 24px 22px; display:flex; gap:9px; }
-        .mclose {
-            width:30px; height:30px; border-radius:50%; background:var(--border);
-            border:none; cursor:pointer; font-size:16px;
-            display:flex; align-items:center; justify-content:center;
-        }
-        .mclose:hover { background:#cbd5e0; }
-
-        /* Form */
-        .fg { margin-bottom:14px; }
-        .fg label { display:block; margin-bottom:5px; font-weight:700; font-size:13px; }
-        .fc {
-            width:100%; padding:10px 12px;
-            border:2px solid var(--border); border-radius:9px;
-            font-family:'Cairo',sans-serif; font-size:13px; color:var(--text);
-            background:#f8faff; transition:border-color .2s;
-        }
-        .fc:focus { outline:none; border-color:var(--navy2); background:white; box-shadow:0 0 0 3px rgba(26,46,90,.1); }
-        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-
-        /* ══ REPORT ═════════════════════════════════ */
-        .rg { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin-bottom:18px; }
-        .rc {
-            background:#f8faff; border-radius:11px; padding:14px;
-            text-align:center; border-top:3px solid var(--navy2);
-        }
-        .rc-n { font-size:26px; font-weight:900; font-family:'Tajawal',sans-serif; color:var(--navy); }
-        .rc-l { font-size:11px; color:var(--muted); margin-top:2px; }
-
-        .dist-row { display:flex; align-items:center; gap:9px; margin-bottom:8px; }
-        .dist-bg  { flex:1; height:7px; background:#e2e8f0; border-radius:3px; overflow:hidden; }
-        .dist-fill { height:100%; border-radius:3px; transition:width .5s; }
+        .note-i:focus { outline:none; border-color:#d4a017; background:rgba(255,255,255,.09); }
+        .note-i::placeholder { color:var(--muted); }
 
         /* Phone input */
         .phone-i {
-            padding:6px 8px; border:2px solid var(--border); border-radius:7px;
-            font-family:'Cairo',sans-serif; font-size:12px; color:var(--text);
-            background:#f8faff; width:100%; min-width:100px; direction:ltr;
+            padding:6px 8px;
+            background:rgba(255,255,255,.05);
+            border:1.5px solid rgba(212,160,23,.2); border-radius:7px;
+            font-family:'Cairo',sans-serif; font-size:12px; color:var(--white);
+            width:100%; min-width:100px; direction:ltr;
         }
-        .phone-i:focus { outline:none; border-color:#25d366; background:white; }
+        .phone-i:focus { outline:none; border-color:#25d366; background:rgba(255,255,255,.09); }
+        .phone-i::placeholder { color:var(--muted); }
+
+        /* WhatsApp button */
         .btn-wa {
             background:linear-gradient(135deg,#25d366,#128c7e); color:white;
             border:none; border-radius:7px; padding:5px 9px;
@@ -388,36 +406,143 @@
         .btn-wa:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(37,211,102,.4); }
         .btn-wa:disabled { opacity:.4; cursor:not-allowed; transform:none; }
 
-        /* ══ TOAST ══════════════════════════════════ */
+        /* Save indicator */
+        .save-ind { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#34d399; font-weight:700; opacity:0; transition:opacity .3s; }
+        .save-ind.show { opacity:1; }
+
+        /* ══ MODAL ══════════════════════════════════════ */
+        .ov {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,.75);
+            backdrop-filter:blur(8px);
+            z-index:300; justify-content:center; align-items:center;
+        }
+        .ov.active { display:flex; }
+        .mb {
+            background:linear-gradient(160deg, #110a00, #080808);
+            border:1px solid rgba(212,160,23,.2);
+            border-radius:20px; width:92%; max-width:520px; max-height:92vh; overflow-y:auto;
+            box-shadow:0 24px 64px rgba(0,0,0,.6), 0 0 40px rgba(212,160,23,.1);
+            animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+        }
+        .mb.wide { max-width:660px; }
+        @keyframes popIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+        .mh {
+            padding:20px 24px 15px;
+            border-bottom:1px solid rgba(212,160,23,.2);
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .mh-title {
+            font-size:18px; font-weight:900; font-family:'Tajawal',sans-serif;
+            background:linear-gradient(135deg, var(--white), #f5c842);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .mc { padding:20px 24px; }
+        .mf { padding:14px 24px 22px; display:flex; gap:9px; }
+        .mclose {
+            width:30px; height:30px; border-radius:50%;
+            background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1);
+            cursor:pointer; font-size:14px; color:var(--muted);
+            display:flex; align-items:center; justify-content:center; transition:all .2s;
+        }
+        .mclose:hover { background:rgba(255,255,255,.15); color:var(--white); }
+
+        /* Form */
+        .fg { margin-bottom:14px; }
+        .fg label { display:block; margin-bottom:5px; font-weight:700; font-size:13px; color:rgba(255,255,255,.7); }
+        .fc {
+            width:100%; padding:10px 12px;
+            background: rgba(255,255,255,.05);
+            border:1.5px solid rgba(212,160,23,.2); border-radius:9px;
+            font-family:'Cairo',sans-serif; font-size:13px; color:var(--white);
+            transition:border-color .2s;
+        }
+        .fc:focus { outline:none; border-color:#d4a017; background:rgba(255,255,255,.08); box-shadow:0 0 0 3px rgba(212,160,23,.2); }
+        .fc::placeholder { color:var(--muted); }
+        .fc option { background:#110a00; color:var(--white); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+        /* ══ REPORT ═════════════════════════════════════ */
+        .rg { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin-bottom:18px; }
+        .rc {
+            background:rgba(255,255,255,.04); border-radius:12px; padding:14px;
+            text-align:center; border-top:3px solid #d4a017;
+        }
+        .rc-n { font-size:26px; font-weight:900; font-family:'Tajawal',sans-serif; color:var(--white); }
+        .rc-l { font-size:11px; color:var(--muted); margin-top:2px; }
+        .dist-row { display:flex; align-items:center; gap:9px; margin-bottom:8px; }
+        .dist-bg  { flex:1; height:7px; background:rgba(255,255,255,.08); border-radius:3px; overflow:hidden; }
+        .dist-fill { height:100%; border-radius:3px; transition:width .5s; }
+
+        /* ══ TOAST ══════════════════════════════════════ */
         #toast {
             position:fixed; bottom:24px; right:24px; z-index:999;
-            padding:13px 20px; border-radius:11px;
+            padding:13px 20px; border-radius:12px;
             font-weight:700; font-size:13px;
-            box-shadow:0 8px 28px rgba(0,0,0,.18);
             display:none; align-items:center; gap:7px;
             animation:tsUp .3s ease;
+            backdrop-filter:blur(12px);
         }
         #toast.show { display:flex; }
-        #toast.success { background:#166534; color:white; }
-        #toast.danger  { background:#991b1b; color:white; }
+        #toast.success { background:rgba(16,185,129,.25); color:#34d399; border:1px solid rgba(16,185,129,.4); box-shadow:0 8px 28px rgba(0,0,0,.4); }
+        #toast.danger  { background:rgba(239,68,68,.25);  color:#f87171; border:1px solid rgba(239,68,68,.4);  box-shadow:0 8px 28px rgba(0,0,0,.4); }
         @keyframes tsUp { from{transform:translateY(14px);opacity:0} to{transform:translateY(0);opacity:1} }
 
-        /* ══ EMPTY STATE ════════════════════════════ */
+        /* ══ EMPTY STATE ════════════════════════════════ */
         .empty { text-align:center; padding:55px 20px; color:var(--muted); }
         .empty-ico   { font-size:56px; margin-bottom:13px; }
-        .empty-title { font-size:18px; font-weight:800; color:var(--navy); margin-bottom:6px; }
+        .empty-title { font-size:18px; font-weight:800; color:var(--white); margin-bottom:6px; }
         .empty-sub   { font-size:13px; }
 
+        /* ══ REPORT DYNAMIC STYLES ══════════════════════ */
+        .report-info-bar {
+            font-size:12px; color:var(--muted); margin-bottom:16px;
+            padding:10px 14px; background:rgba(255,255,255,.04);
+            border:1px solid var(--glass-border); border-radius:10px;
+        }
+        .report-pass-grid {
+            display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px;
+        }
+        .report-pass-box, .report-fail-box {
+            border-radius:12px; padding:14px; text-align:center;
+        }
+        .report-pass-box { background:rgba(16,185,129,.1);  border:1px solid rgba(16,185,129,.3); }
+        .report-fail-box { background:rgba(239,68,68,.1);   border:1px solid rgba(239,68,68,.3); }
+        .report-pass-box .n { font-size:28px; font-weight:900; color:#34d399; }
+        .report-fail-box .n { font-size:28px; font-weight:900; color:#f87171; }
+        .report-pass-box .l { font-size:11px; color:#34d399; margin-top:3px; }
+        .report-fail-box .l { font-size:11px; color:#f87171; margin-top:3px; }
+        .report-dist-wrap {
+            background:rgba(255,255,255,.03); border-radius:12px; padding:16px;
+            border:1px solid var(--glass-border);
+        }
+        .report-dist-title { font-weight:800; color:var(--white); margin-bottom:12px; font-size:14px; }
+
         @media print {
-            .topbar,.btn,.search-row,.bc,.ov,#toast { display:none!important; }
-            body { background:white; }
+            .topbar,.btn,.search-row,.bc,.ov,#toast,
+            .bg-layer,.particles { display:none!important; }
+            body { background:white; color:#000; }
             .wrap { padding:0; }
         }
+
         ::-webkit-scrollbar { width:6px; }
-        ::-webkit-scrollbar-thumb { background:#cbd5e0; border-radius:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(212,160,23,.4); border-radius:10px; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(212,160,23,.7); }
     </style>
 </head>
 <body>
+
+<!-- Background -->
+<div class="bg-layer">
+    <div class="bg-gradient"></div>
+    <div class="dot-grid"></div>
+    <div class="grid-lines"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+<div class="particles" id="particles"></div>
 
 <!-- ═══════════════ TOPBAR ════════════════ -->
 <div class="topbar">
@@ -444,11 +569,11 @@
 
     <!-- Stats -->
     <div class="stats-row">
-        <div class="sc">       <div class="sc-n" id="stSess">—</div><div class="sc-l">📚 الحصص المحملة</div></div>
-        <div class="sc g">     <div class="sc-n" id="stStu">—</div><div class="sc-l">👥 طلاب في السجلات</div></div>
-        <div class="sc b">     <div class="sc-n" id="stEx">—</div><div class="sc-l">📝 إجمالي الامتحانات</div></div>
-        <div class="sc t">     <div class="sc-n" id="stGr">—</div><div class="sc-l">✅ درجات مُدخَلة</div></div>
-        <div class="sc r">     <div class="sc-n" id="stAv">—</div><div class="sc-l">📊 المتوسط العام</div></div>
+        <div class="sc">   <div class="sc-n" id="stSess">—</div><div class="sc-l">📚 الحصص المحملة</div></div>
+        <div class="sc g"> <div class="sc-n" id="stStu">—</div><div class="sc-l">👥 طلاب في السجلات</div></div>
+        <div class="sc b"> <div class="sc-n" id="stEx">—</div><div class="sc-l">📝 إجمالي الامتحانات</div></div>
+        <div class="sc t"> <div class="sc-n" id="stGr">—</div><div class="sc-l">✅ درجات مُدخَلة</div></div>
+        <div class="sc r"> <div class="sc-n" id="stAv">—</div><div class="sc-l">📊 المتوسط العام</div></div>
     </div>
 
     <!-- ══ SECTION 1: SESSIONS ══ -->
@@ -475,7 +600,7 @@
         <div class="bc">
             <a onclick="goSess()">🏠 الحصص</a>
             <span>›</span>
-            <span id="bc2" style="color:var(--navy);font-weight:700;">الامتحانات</span>
+            <span id="bc2" style="color:#f5c842;font-weight:700;">الامتحانات</span>
         </div>
         <div class="sec-hd">
             <div>
@@ -503,7 +628,7 @@
             <span>›</span>
             <a onclick="goExams()" id="bc3a">الامتحانات</a>
             <span>›</span>
-            <span id="bc3" style="color:var(--navy);font-weight:700;">الدرجات</span>
+            <span id="bc3" style="color:#f5c842;font-weight:700;">الدرجات</span>
         </div>
         <div class="sec-hd">
             <div>
@@ -625,14 +750,27 @@
 </div>
 
 <!-- ═══════════════════════════════════════════
-     JAVASCRIPT
+     JAVASCRIPT (unchanged logic)
 ═══════════════════════════════════════════════ -->
+<script>
+// Floating particles
+const particlesEl = document.getElementById('particles');
+for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+    const colors = ['#f5c842','#e8c96a','#d4a017','#e8203a','#ff6070','#c0182a'];
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    particlesEl.appendChild(p);
+}
+</script>
+
 <script>
 'use strict';
 
-/* ═══════════════════════════════════════
-   LOOKUP TABLES  (same as attendance.html)
-═══════════════════════════════════════ */
 const SUBJECTS = {
     math:'رياضيات', arabic:'لغة عربية', english:'لغة إنجليزية',
     science:'علوم', social:'دراسات اجتماعية',
@@ -645,8 +783,7 @@ const CLASSES = {
     grade7:'الأول الإعدادي', grade8:'الثاني الإعدادي', grade9:'الثالث الإعدادي'
 };
 const TEACHERS = {
-    t1:'أ. محمد أحمد', t2:'أ. فاطمة علي', t3:'أ. خالد محمود',
-    t4:'أ. سارة حسن', t5:'أ. نور الدين', t6:'أ. منى إبراهيم'
+    t1:'أ. رامي ابو نور'
 };
 const EXAM_TYPES = {
     written:'تحريري ✍️', oral:'شفهي 🎤', quiz:'اختبار قصير 📄',
@@ -655,9 +792,7 @@ const EXAM_TYPES = {
 };
 const DAYS = ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
 
-/* ── exact same helpers as attendance.html ── */
-function getSubjectName(key, customClasses) { return SUBJECTS[key] || key; }
-
+function getSubjectName(key) { return SUBJECTS[key] || key; }
 function getClassName(key, customClasses) {
     if (customClasses && Array.isArray(customClasses)) {
         const f = customClasses.find(c => c.id == key || c.name == key);
@@ -665,8 +800,8 @@ function getClassName(key, customClasses) {
     }
     return CLASSES[key] || key;
 }
-function getTeacherName(key)  { return TEACHERS[key] || key; }
-function getDayName(i)        { return DAYS[i] !== undefined ? DAYS[i] : String(i); }
+function getTeacherName(key) { return TEACHERS[key] || key; }
+function getDayName(i)       { return DAYS[i] !== undefined ? DAYS[i] : String(i); }
 function formatTime(t) {
     if (!t) return '';
     const [h,m] = t.split(':'); const hr = parseInt(h);
@@ -679,7 +814,6 @@ function fDate(d) {
     return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
-/* ─── Grade helpers ─── */
 function letterGrade(score, max, pass = 50) {
     const p = (score / max) * 100;
     if (p >= 90) return 'A';
@@ -690,16 +824,14 @@ function letterGrade(score, max, pass = 50) {
 }
 function gradeColor(score, max) {
     const p = (score / max) * 100;
-    if (p >= 90) return '#22c55e';
-    if (p >= 75) return '#3b82f6';
-    if (p >= 60) return '#f59e0b';
-    if (p >= 50) return '#f97316';
-    return '#ef4444';
+    if (p >= 90) return '#34d399';
+    if (p >= 75) return '#60a5fa';
+    if (p >= 60) return '#fbbf24';
+    if (p >= 50) return '#fb923c';
+    return '#f87171';
 }
 
-/* ═══════════════════════════════════════
-   UI HELPERS
-═══════════════════════════════════════ */
+/* ── UI Helpers ── */
 function setStatus(s, msg) {
     document.getElementById('sb').className = 'status-bar ' + s;
     document.getElementById('sbDot').className = 's-dot ' + s;
@@ -725,76 +857,56 @@ function showSec(id) {
     window.scrollTo({top:0, behavior:'smooth'});
 }
 
-/* ═══════════════════════════════════════
-   STATE
-═══════════════════════════════════════ */
-let allSessions   = [];      // built from schedule/data
-let customClasses = [];      // schedule/data → classes[]
-let studentsMap   = {};      // { String(sessionId) → [{id,name}] }
-let examsData     = {};      // { String(sessionId) → [{id,name,max,...}] }
-let gradesData    = {};      // { String(sessionId) → { String(examId) → { String(stuId) → {score,note} } } }
-let parentPhones  = {};      // { String(studentId) → phoneNumber }  — persistent in Firebase
-let curSessId     = null;    // String
-let curExamId     = null;    // Number
+/* ── State ── */
+let allSessions   = [];
+let customClasses = [];
+let studentsMap   = {};
+let examsData     = {};
+let gradesData    = {};
+let parentPhones  = {};
+let curSessId     = null;
+let curExamId     = null;
 let sortDir       = {};
 
-/* ═══════════════════════════════════════
-   FIREBASE LOAD
-═══════════════════════════════════════ */
+/* ── Firebase Load ── */
 async function loadAll() {
     setStatus('connecting', '🔌 جاري تحميل البيانات من Firebase...');
-
-    /* 1 ── Schedule → sessions
-       Exact path: db.collection('schedule').doc('data')
-       Same as schedule_management.html */
     try {
         const snap = await db.collection('schedule').doc('data').get();
         if (snap.exists) {
             const d = snap.data();
             customClasses = d.classes || [];
             allSessions = (d.sessions || []).map(s => ({
-                id:       s.id,                    // keep original (number or string)
-                sid:      String(s.id),            // string version for map keys
-                subject:  getSubjectName(s.subject),
-                subKey:   s.subject,
-                class:    getClassName(s.class, d.classes),
-                teacher:  getTeacherName(s.teacher),
-                day:      getDayName(s.day),
-                dayIdx:   s.day,
-                time:     (s.startTime && s.endTime)
-                           ? `${formatTime(s.startTime)} — ${formatTime(s.endTime)}`
-                           : '',
-                room:     (s.room || '').toUpperCase()
+                id:      s.id,
+                sid:     String(s.id),
+                subject: getSubjectName(s.subject),
+                subKey:  s.subject,
+                class:   getClassName(s.class, d.classes),
+                teacher: getTeacherName(s.teacher),
+                day:     getDayName(s.day),
+                dayIdx:  s.day,
+                time:    (s.startTime && s.endTime) ? `${formatTime(s.startTime)} — ${formatTime(s.endTime)}` : '',
+                room:    (s.room || '').toUpperCase()
             }));
             setStatus('connected', `🔥 Firebase متصل — ${allSessions.length} حصة محملة`);
         } else {
             allSessions = [];
             setStatus('connected', '⚠️ لا توجد حصص — اذهب لصفحة جدول الحصص وأضف حصصاً');
         }
-    } catch(e) {
-        setStatus('error', '❌ خطأ: ' + e.message);
-    }
+    } catch(e) { setStatus('error', '❌ خطأ: ' + e.message); }
 
-    /* 2 ── Students → attendance_data/default_user/attendanceSessions
-       Exact path: userCol('attendanceSessions')
-       Same as attendance.html: userCol = db.collection('attendance_data').doc('default_user').collection(c)
-       Each doc: { id: sessionId, students: [{id,name,status,...}], ... } */
     try {
         const snap = await userCol('attendanceSessions').get();
         studentsMap = {};
         snap.forEach(doc => {
             const d = doc.data();
-            // doc.id might be String(sessionId), d.id is the session id
             const key = d.id !== undefined ? String(d.id) : doc.id;
             if (d.students && d.students.length) {
                 studentsMap[key] = d.students.map(s => ({ id: s.id, name: s.name }));
             }
         });
-    } catch(e) {
-        console.warn('Students load:', e);
-    }
+    } catch(e) { console.warn('Students load:', e); }
 
-    /* 3 ── Grades: grades/data → { exams:{}, grades:{} } */
     try {
         const snap = await db.collection('grades').doc('data').get();
         if (snap.exists) {
@@ -803,41 +915,30 @@ async function loadAll() {
             gradesData   = d.grades || {};
             parentPhones = d.parentPhones || {};
         }
-    } catch(e) {
-        console.warn('Grades load:', e);
-    }
+    } catch(e) { console.warn('Grades load:', e); }
 
     renderSessions();
     updateStats();
 
-    /* 4 ── Live listener for schedule changes (same as attendance.html) */
     db.collection('schedule').doc('data').onSnapshot(snap => {
         if (!snap.exists) return;
         const d = snap.data();
         customClasses = d.classes || [];
         allSessions = (d.sessions || []).map(s => ({
-            id:      s.id,
-            sid:     String(s.id),
-            subject: getSubjectName(s.subject),
-            subKey:  s.subject,
-            class:   getClassName(s.class, d.classes),
+            id: s.id, sid: String(s.id),
+            subject: getSubjectName(s.subject), subKey: s.subject,
+            class: getClassName(s.class, d.classes),
             teacher: getTeacherName(s.teacher),
-            day:     getDayName(s.day),
-            dayIdx:  s.day,
-            time:    (s.startTime && s.endTime)
-                      ? `${formatTime(s.startTime)} — ${formatTime(s.endTime)}`
-                      : '',
-            room:    (s.room || '').toUpperCase()
+            day: getDayName(s.day), dayIdx: s.day,
+            time: (s.startTime && s.endTime) ? `${formatTime(s.startTime)} — ${formatTime(s.endTime)}` : '',
+            room: (s.room || '').toUpperCase()
         }));
         setStatus('connected', `🔥 Firebase متصل — ${allSessions.length} حصة`);
         if (!curSessId) renderSessions();
         updateStats();
-    }, err => {
-        setStatus('error', '❌ ' + err.message);
-    });
+    }, err => { setStatus('error', '❌ ' + err.message); });
 }
 
-/* ─── Save grades ─── */
 let _saveDeb;
 async function _doSave() {
     setStatus('saving', '💾 جاري الحفظ...');
@@ -846,26 +947,18 @@ async function _doSave() {
         setStatus('connected', '🔥 Firebase — تم الحفظ ✔');
         const el = document.getElementById('saveInd');
         if (el) { el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2200); }
-    } catch(e) {
-        setStatus('error', '❌ خطأ في الحفظ: ' + e.message);
-    }
+    } catch(e) { setStatus('error', '❌ خطأ في الحفظ: ' + e.message); }
 }
 function scheduleSave() { clearTimeout(_saveDeb); _saveDeb = setTimeout(_doSave, 700); }
 
-/* ═══════════════════════════════════════
-   STATS
-═══════════════════════════════════════ */
 function updateStats() {
     document.getElementById('stSess').textContent = allSessions.length;
-
     let totalStu = 0;
     Object.values(studentsMap).forEach(arr => totalStu += arr.length);
     document.getElementById('stStu').textContent = totalStu;
-
     let totalEx = 0;
     Object.values(examsData).forEach(arr => totalEx += arr.length);
     document.getElementById('stEx').textContent = totalEx;
-
     let totalGr = 0, sumG = 0, cntG = 0;
     Object.values(gradesData).forEach(byEx =>
         Object.values(byEx).forEach(byStu =>
@@ -882,18 +975,13 @@ function updateStats() {
     document.getElementById('stAv').textContent = cntG ? (sumG/cntG).toFixed(1) : '—';
 }
 
-/* ═══════════════════════════════════════
-   SECTION 1 — SESSIONS
-═══════════════════════════════════════ */
+/* ── Section 1: Sessions ── */
 function renderSessions() {
     const grid = document.getElementById('sessGrid');
     const q    = (document.getElementById('sessSearch').value || '').trim().toLowerCase();
     const list = allSessions.filter(s =>
-        !q ||
-        s.subject.toLowerCase().includes(q) ||
-        s.class.toLowerCase().includes(q) ||
-        s.teacher.toLowerCase().includes(q) ||
-        s.day.toLowerCase().includes(q)
+        !q || s.subject.toLowerCase().includes(q) || s.class.toLowerCase().includes(q) ||
+        s.teacher.toLowerCase().includes(q) || s.day.toLowerCase().includes(q)
     );
 
     if (!list.length) {
@@ -912,14 +1000,13 @@ function renderSessions() {
         if (!students)      tag = `<span class="tag danger">⚠️ لا يوجد طلاب — سجّل الحضور أولاً</span>`;
         else if (exams > 0) tag = `<span class="tag ok">📝 ${exams} امتحان</span>`;
         else                tag = `<span class="tag warn">📋 لا توجد امتحانات بعد</span>`;
-
         return `
         <div class="sess-card" onclick="openSession('${s.sid}')">
             <div class="sess-subject">${s.subject}</div>
             <div class="sess-row">🏫 ${s.class}</div>
             <div class="sess-row">👨‍🏫 ${s.teacher}</div>
             <div class="sess-row">📅 ${s.day}${s.time ? ' · ' + s.time : ''}</div>
-            <div class="sess-row">👥 <b>${students}</b> طالب مسجّل</div>
+            <div class="sess-row">👥 <b style="color:#f5c842">${students}</b> طالب مسجّل</div>
             ${tag}
         </div>`;
     }).join('');
@@ -943,14 +1030,11 @@ function openSession(sid) {
     renderExams();
 }
 
-/* ═══════════════════════════════════════
-   SECTION 2 — EXAMS
-═══════════════════════════════════════ */
+/* ── Section 2: Exams ── */
 function renderExams() {
     const list     = examsData[curSessId] || [];
     const students = studentsMap[curSessId] || [];
     const con      = document.getElementById('examsList');
-
     if (!list.length) {
         con.innerHTML = `<div class="empty">
             <div class="empty-ico">📋</div>
@@ -959,15 +1043,11 @@ function renderExams() {
         </div>`;
         return;
     }
-
     con.innerHTML = list.map(exam => {
         const gMap    = ((gradesData[curSessId] || {})[String(exam.id)]) || {};
-        const entered = Object.values(gMap).filter(g =>
-            g.score !== '' && g.score !== null && g.score !== undefined
-        ).length;
+        const entered = Object.values(gMap).filter(g => g.score !== '' && g.score !== null && g.score !== undefined).length;
         const pct   = students.length ? Math.round((entered / students.length) * 100) : 0;
-        const pCol  = pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444';
-
+        const pCol  = pct >= 80 ? '#34d399' : pct >= 50 ? '#fbbf24' : '#f87171';
         return `
         <div class="exam-row" onclick="openExam(${exam.id})">
             <div class="exam-ico">📝</div>
@@ -992,7 +1072,6 @@ function renderExams() {
     }).join('');
 }
 
-/* ─── Add/Edit Exam Modal ─── */
 function openAddExamModal() {
     document.getElementById('emTitle').textContent = '📝 امتحان جديد';
     document.getElementById('emId').value    = '';
@@ -1020,19 +1099,16 @@ function editExam(examId) {
 }
 
 async function saveExam() {
-    const name  = document.getElementById('emName').value.trim();
-    const max   = parseInt(document.getElementById('emMax').value);
-    const date  = document.getElementById('emDate').value;
-    const type  = document.getElementById('emType').value;
-    const pass  = parseInt(document.getElementById('emPass').value) || 50;
-    const notes = document.getElementById('emNotes').value.trim();
+    const name   = document.getElementById('emName').value.trim();
+    const max    = parseInt(document.getElementById('emMax').value);
+    const date   = document.getElementById('emDate').value;
+    const type   = document.getElementById('emType').value;
+    const pass   = parseInt(document.getElementById('emPass').value) || 50;
+    const notes  = document.getElementById('emNotes').value.trim();
     const editId = document.getElementById('emId').value;
-
     if (!name)        { toast('أدخل اسم الامتحان', 'danger'); return; }
     if (!max || max < 1) { toast('أدخل الدرجة الكاملة', 'danger'); return; }
-
     if (!examsData[curSessId]) examsData[curSessId] = [];
-
     if (editId) {
         const idx = examsData[curSessId].findIndex(e => e.id === parseInt(editId));
         if (idx !== -1) examsData[curSessId][idx] = { ...examsData[curSessId][idx], name, max, date, type, pass, notes };
@@ -1041,7 +1117,6 @@ async function saveExam() {
         examsData[curSessId].push({ id: Date.now(), name, max, date, type, pass, notes });
         toast('تم إضافة الامتحان ✔');
     }
-
     await _doSave();
     closeOv('examModal');
     renderExams();
@@ -1058,11 +1133,7 @@ async function deleteExam(examId) {
     toast('تم حذف الامتحان');
 }
 
-function goExams() {
-    curExamId = null;
-    showSec('sec2');
-    renderExams();
-}
+function goExams() { curExamId = null; showSec('sec2'); renderExams(); }
 
 function openExam(examId) {
     curExamId = examId;
@@ -1078,26 +1149,21 @@ function openExam(examId) {
     renderGrades();
 }
 
-/* ═══════════════════════════════════════
-   SECTION 3 — GRADES
-═══════════════════════════════════════ */
+/* ── Section 3: Grades ── */
 function renderGrades() {
     const exam     = (examsData[curSessId] || []).find(e => e.id === curExamId);
     const students = studentsMap[curSessId] || [];
     const tbody    = document.getElementById('grBody');
     document.getElementById('tblCount').textContent = `${students.length} طالب`;
-
     if (!students.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="padding:55px;text-align:center;color:var(--muted);">
+        tbody.innerHTML = `<tr><td colspan="9" style="padding:55px;text-align:center;color:var(--muted);">
             <div style="font-size:46px;margin-bottom:12px;">👥</div>
-            <div style="font-size:17px;font-weight:800;color:var(--navy);margin-bottom:6px;">لا يوجد طلاب مسجّلون في هذه الحصة</div>
+            <div style="font-size:17px;font-weight:800;color:var(--white);margin-bottom:6px;">لا يوجد طلاب مسجّلون في هذه الحصة</div>
             <div style="font-size:13px;">اذهب لصفحة <b>الحضور والغياب</b> وأضف الطلاب لهذه الحصة أولاً</div>
         </td></tr>`;
         return;
     }
-
     const gMap = ((gradesData[curSessId] || {})[String(curExamId)]) || {};
-
     tbody.innerHTML = students.map((st, idx) => {
         const g        = gMap[String(st.id)] || { score:'', note:'' };
         const score    = (g.score !== '' && g.score !== null && g.score !== undefined) ? g.score : '';
@@ -1106,12 +1172,10 @@ function renderGrades() {
         const fScore   = hasScore ? parseFloat(score) : 0;
         const pct      = hasScore ? Math.round((fScore / exam.max) * 100) : 0;
         const ltr      = hasScore ? letterGrade(fScore, exam.max, exam.pass || 50) : 'X';
-        const col      = hasScore ? gradeColor(fScore, exam.max) : '#94a3b8';
+        const col      = hasScore ? gradeColor(fScore, exam.max) : '#64748b';
         const valid    = !hasScore || (fScore >= 0 && fScore <= exam.max);
-
         const initials = st.name.split(' ').slice(0,2).map(n => n[0] || '').join('');
         const phone    = (parentPhones[String(st.id)] || '');
-
         return `<tr id="tr-${st.id}">
             <td style="color:var(--muted);font-weight:600;font-size:12px;">${idx+1}</td>
             <td>
@@ -1122,10 +1186,8 @@ function renderGrades() {
             </td>
             <td>
                 <input type="number" class="gi ${hasScore ? (valid?'ok':'err') : ''}"
-                       id="sc-${st.id}"
-                       value="${score}"
-                       min="0" max="${exam.max}"
-                       placeholder="&#8212;"
+                       id="sc-${st.id}" value="${score}"
+                       min="0" max="${exam.max}" placeholder="&#8212;"
                        oninput="onInput(${st.id},${exam.max},${exam.pass||50})"
                        onblur="autoSave(${st.id})">
             </td>
@@ -1135,26 +1197,12 @@ function renderGrades() {
                 <div class="mini-bar"><div class="mini-fill" id="bar-${st.id}" style="width:${pct}%;background:${col};"></div></div>
             </td>
             <td><span class="ltr ${ltr}" id="ltr-${st.id}">${ltr === 'X' ? '&#8212;' : ltr}</span></td>
-            <td>
-                <input type="text" class="note-i"
-                       id="nt-${st.id}"
-                       value="${note}"
-                       placeholder="ملاحظة..."
-                       onblur="autoSave(${st.id})">
-            </td>
-            <td>
-                <input type="tel" class="phone-i"
-                       id="ph-${st.id}"
-                       value="${phone}"
-                       placeholder="05xxxxxxxx"
-                       onblur="savePhone(${st.id})">
-            </td>
+            <td><input type="text" class="note-i" id="nt-${st.id}" value="${note}" placeholder="ملاحظة..." onblur="autoSave(${st.id})"></td>
+            <td><input type="tel" class="phone-i" id="ph-${st.id}" value="${phone}" placeholder="05xxxxxxxx" onblur="savePhone(${st.id})"></td>
             <td>
                 <div style="display:flex;flex-direction:column;gap:4px;">
-                    <button class="btn-wa" onclick="sendToParent(${st.id})" title="إرسال الدرجة لولي الأمر عبر واتساب">
-                        📲 إرسال
-                    </button>
-                    <button class="btn btn-ghost btn-xs" onclick="clearGrade(${st.id})" title="مسح الدرجة">&#x2715;</button>
+                    <button class="btn-wa" onclick="sendToParent(${st.id})">📲 إرسال</button>
+                    <button class="btn btn-ghost btn-xs" onclick="clearGrade(${st.id})" title="مسح">&#x2715;</button>
                 </div>
             </td>
         </tr>`;
@@ -1162,56 +1210,44 @@ function renderGrades() {
 }
 
 function onInput(stId, max, pass) {
-    const inp  = document.getElementById(`sc-${stId}`);
-    const pEl  = document.getElementById(`pct-${stId}`);
-    const bEl  = document.getElementById(`bar-${stId}`);
-    const lEl  = document.getElementById(`ltr-${stId}`);
-    const val  = inp.value;
-
+    const inp = document.getElementById(`sc-${stId}`);
+    const pEl = document.getElementById(`pct-${stId}`);
+    const bEl = document.getElementById(`bar-${stId}`);
+    const lEl = document.getElementById(`ltr-${stId}`);
+    const val = inp.value;
     if (val === '') {
-        inp.className = 'gi';
-        pEl.textContent = '—'; pEl.style.color = '#94a3b8';
-        bEl.style.width = '0'; bEl.style.background = '#e2e8f0';
-        lEl.textContent = '—'; lEl.className = 'ltr X';
-        return;
+        inp.className = 'gi'; pEl.textContent = '—'; pEl.style.color = '#64748b';
+        bEl.style.width = '0'; bEl.style.background = 'rgba(255,255,255,.1)';
+        lEl.textContent = '—'; lEl.className = 'ltr X'; return;
     }
-
     const score = parseFloat(val);
     const valid = !isNaN(score) && score >= 0 && score <= max;
     inp.className = 'gi ' + (valid ? 'ok' : 'err');
     if (!valid) return;
-
-    const pct  = Math.round((score / max) * 100);
-    const ltr  = letterGrade(score, max, pass);
-    const col  = gradeColor(score, max);
-
-    pEl.textContent    = pct + '%';
-    pEl.style.color    = col;
-    bEl.style.width    = pct + '%';
-    bEl.style.background = col;
-    lEl.textContent    = ltr;
-    lEl.className      = 'ltr ' + ltr;
+    const pct = Math.round((score / max) * 100);
+    const ltr = letterGrade(score, max, pass);
+    const col = gradeColor(score, max);
+    pEl.textContent = pct + '%'; pEl.style.color = col;
+    bEl.style.width = pct + '%'; bEl.style.background = col;
+    lEl.textContent = ltr; lEl.className = 'ltr ' + ltr;
 }
 
 function autoSave(stId) {
     const sInp = document.getElementById(`sc-${stId}`);
     const nInp = document.getElementById(`nt-${stId}`);
     if (!sInp) return;
-
     const score = sInp.value !== '' ? parseFloat(sInp.value) : '';
     const note  = nInp ? nInp.value.trim() : '';
-
     if (!gradesData[curSessId]) gradesData[curSessId] = {};
     if (!gradesData[curSessId][String(curExamId)]) gradesData[curSessId][String(curExamId)] = {};
     gradesData[curSessId][String(curExamId)][String(stId)] = { score, note };
-
     scheduleSave();
     updateStats();
 }
 
 function clearGrade(stId) {
     const sInp = document.getElementById(`sc-${stId}`);
-    if (sInp) { sInp.value = ''; }
+    if (sInp) sInp.value = '';
     const exam = (examsData[curSessId] || []).find(e => e.id === curExamId);
     if (exam) onInput(stId, exam.max, exam.pass || 50);
     const nInp = document.getElementById(`nt-${stId}`);
@@ -1236,13 +1272,9 @@ function sortG(by) {
     const students = [...(studentsMap[curSessId] || [])];
     const exam     = (examsData[curSessId] || []).find(e => e.id === curExamId);
     const gMap     = ((gradesData[curSessId] || {})[String(curExamId)]) || {};
-
     sortDir[by] = sortDir[by] === 'asc' ? 'desc' : 'asc';
-
     if (by === 'name') {
-        students.sort((a,b) => sortDir[by] === 'asc'
-            ? a.name.localeCompare(b.name, 'ar')
-            : b.name.localeCompare(a.name, 'ar'));
+        students.sort((a,b) => sortDir[by] === 'asc' ? a.name.localeCompare(b.name, 'ar') : b.name.localeCompare(a.name, 'ar'));
     } else {
         students.sort((a,b) => {
             const sa = parseFloat((gMap[String(a.id)] || {}).score ?? -1);
@@ -1254,20 +1286,16 @@ function sortG(by) {
     renderGrades();
 }
 
-/* ═══════════════════════════════════════
-   REPORT MODAL
-═══════════════════════════════════════ */
+/* ── Report ── */
 function openReport() {
     const exam     = (examsData[curSessId] || []).find(e => e.id === curExamId);
     const students = studentsMap[curSessId] || [];
     const sess     = allSessions.find(s => s.sid === curSessId);
     const gMap     = ((gradesData[curSessId] || {})[String(curExamId)]) || {};
-
     const scores = students
         .map(st => (gMap[String(st.id)] || {}).score)
         .filter(s => s !== '' && s !== null && s !== undefined && !isNaN(parseFloat(s)))
         .map(Number);
-
     const total   = students.length;
     const entered = scores.length;
     const avg     = entered ? (scores.reduce((a,b)=>a+b,0)/entered).toFixed(1) : '—';
@@ -1276,55 +1304,34 @@ function openReport() {
     const p       = exam.pass || 50;
     const passed  = scores.filter(s => (s/exam.max)*100 >= p).length;
     const failed  = scores.filter(s => (s/exam.max)*100 <  p).length;
-
     const dist = {A:0,B:0,C:0,D:0,F:0};
     scores.forEach(s => dist[letterGrade(s, exam.max, p)]++);
-
     const distRows = [
-        ['A','#22c55e','ممتاز (90%+)'],
-        ['B','#3b82f6','جيد جداً (75-89%)'],
-        ['C','#f59e0b','جيد (60-74%)'],
-        ['D','#f97316','مقبول'],
-        ['F','#ef4444','ضعيف (أقل من ' + p + '%)'],
+        ['A','#34d399','ممتاز (90%+)'],
+        ['B','#60a5fa','جيد جداً (75-89%)'],
+        ['C','#fbbf24','جيد (60-74%)'],
+        ['D','#fb923c','مقبول'],
+        ['F','#f87171','ضعيف (أقل من ' + p + '%)'],
     ];
-
     document.getElementById('reportContent').innerHTML = `
-        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;padding:10px 14px;background:#f8faff;border-radius:9px;">
+        <div class="report-info-bar">
             📚 ${sess?.subject||''} — ${sess?.class||''} &nbsp;·&nbsp;
             📝 ${exam.name} &nbsp;·&nbsp;
             الدرجة الكاملة: ${exam.max}
             ${exam.date ? ' &nbsp;·&nbsp; 📅 ' + fDate(exam.date) : ''}
         </div>
         <div class="rg">
-            <div class="rc">
-                <div class="rc-n">${total}</div>
-                <div class="rc-l">إجمالي الطلاب</div>
-            </div>
-            <div class="rc" style="border-top-color:#22c55e;">
-                <div class="rc-n" style="color:var(--green);">${avg}</div>
-                <div class="rc-l">المتوسط</div>
-            </div>
-            <div class="rc" style="border-top-color:var(--gold);">
-                <div class="rc-n" style="color:#854d0e;">${hi}</div>
-                <div class="rc-l">أعلى درجة</div>
-            </div>
-            <div class="rc" style="border-top-color:var(--red);">
-                <div class="rc-n" style="color:var(--red);">${lo}</div>
-                <div class="rc-l">أدنى درجة</div>
-            </div>
+            <div class="rc"><div class="rc-n">${total}</div><div class="rc-l">إجمالي الطلاب</div></div>
+            <div class="rc" style="border-top-color:#34d399;"><div class="rc-n" style="color:#34d399;">${avg}</div><div class="rc-l">المتوسط</div></div>
+            <div class="rc" style="border-top-color:#fbbf24;"><div class="rc-n" style="color:#fbbf24;">${hi}</div><div class="rc-l">أعلى درجة</div></div>
+            <div class="rc" style="border-top-color:#f87171;"><div class="rc-n" style="color:#f87171;">${lo}</div><div class="rc-l">أدنى درجة</div></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
-            <div style="background:#f0fdf4;border-radius:10px;padding:14px;text-align:center;border:2px solid #86efac;">
-                <div style="font-size:28px;font-weight:900;color:#166534;">${passed}</div>
-                <div style="font-size:11px;color:#166534;margin-top:3px;">✅ ناجح (≥ ${p}%)</div>
-            </div>
-            <div style="background:#fef2f2;border-radius:10px;padding:14px;text-align:center;border:2px solid #fca5a5;">
-                <div style="font-size:28px;font-weight:900;color:#991b1b;">${failed}</div>
-                <div style="font-size:11px;color:#991b1b;margin-top:3px;">❌ راسب (< ${p}%)</div>
-            </div>
+        <div class="report-pass-grid">
+            <div class="report-pass-box"><div class="n">${passed}</div><div class="l">✅ ناجح (≥ ${p}%)</div></div>
+            <div class="report-fail-box"><div class="n">${failed}</div><div class="l">❌ راسب (< ${p}%)</div></div>
         </div>
-        <div style="background:#f8faff;border-radius:10px;padding:16px;">
-            <div style="font-weight:800;color:var(--navy);margin-bottom:12px;font-size:14px;">📊 توزيع التقديرات</div>
+        <div class="report-dist-wrap">
+            <div class="report-dist-title">📊 توزيع التقديرات</div>
             ${distRows.map(([l,c,lbl]) => `
             <div class="dist-row">
                 <span class="ltr ${l}" style="min-width:34px;">${l}</span>
@@ -1336,17 +1343,14 @@ function openReport() {
             </div>`).join('')}
         </div>
         ${entered < total ? `
-        <div style="margin-top:12px;padding:9px 13px;background:#fef9c3;border-radius:8px;font-size:12px;color:#854d0e;">
+        <div style="margin-top:12px;padding:9px 13px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;font-size:12px;color:#fbbf24;">
             ⚠️ ${total - entered} طالب لم تُدخَل درجتهم بعد
         </div>` : ''}
     `;
-
     openOv('reportModal');
 }
 
-/* ═══════════════════════════════════════
-   PARENT PHONE & WHATSAPP
-═══════════════════════════════════════ */
+/* ── Parent Phone & WhatsApp ── */
 function savePhone(stId) {
     const inp = document.getElementById(`ph-${stId}`);
     if (!inp) return;
@@ -1362,50 +1366,23 @@ function sendToParent(stId) {
     const students = studentsMap[curSessId] || [];
     const st = students.find(s => s.id === stId);
     if (!st || !exam) return;
-
     const phone = (document.getElementById(`ph-${stId}`) || {}).value || parentPhones[String(stId)] || '';
-    if (!phone) {
-        toast('❌ لم يتم إدخال رقم ولي الأمر', 'danger');
-        document.getElementById(`ph-${stId}`)?.focus();
-        return;
-    }
-
+    if (!phone) { toast('❌ لم يتم إدخال رقم ولي الأمر', 'danger'); document.getElementById(`ph-${stId}`)?.focus(); return; }
     const scoreInp = document.getElementById(`sc-${stId}`);
     const score = scoreInp ? scoreInp.value : '';
-    if (score === '' || isNaN(parseFloat(score))) {
-        toast('❌ لم يتم إدخال الدرجة بعد', 'danger');
-        return;
-    }
-
+    if (score === '' || isNaN(parseFloat(score))) { toast('❌ لم يتم إدخال الدرجة بعد', 'danger'); return; }
     const pct  = Math.round((parseFloat(score) / exam.max) * 100);
     const ltr  = letterGrade(parseFloat(score), exam.max, exam.pass || 50);
     const note = (document.getElementById(`nt-${stId}`) || {}).value || '';
-
     const gradeLabels = { A:'ممتاز', B:'جيد جداً', C:'جيد', D:'مقبول', F:'ضعيف' };
-    const grLabel = gradeLabels[ltr] || ltr;
-
-    const msg = `مرحباً ولي أمر الطالب/ة: ${st.name}
-
-نتيجة الامتحان:
-📚 المادة: ${sess?.subject || ''}
-📝 الامتحان: ${exam.name}
-✏️ الدرجة: ${score} / ${exam.max}
-📊 النسبة: ${pct}%
-🏅 التقدير: ${grLabel}${note ? '\n📌 ملاحظة: ' + note : ''}
-
-مع تحياتنا`;
-
-    // Normalize phone: remove spaces/dashes, ensure country code
+    const msg = `مرحباً ولي أمر الطالب/ة: ${st.name}\n\nنتيجة الامتحان:\n📚 المادة: ${sess?.subject || ''}\n📝 الامتحان: ${exam.name}\n✏️ الدرجة: ${score} / ${exam.max}\n📊 النسبة: ${pct}%\n🏅 التقدير: ${gradeLabels[ltr]||ltr}${note ? '\n📌 ملاحظة: ' + note : ''}\n\nمع تحياتنا`;
     let normalized = phone.replace(/[\s\-()]/g, '');
     if (normalized.startsWith('0')) normalized = '966' + normalized.slice(1);
     if (!normalized.startsWith('+')) normalized = '+' + normalized;
-    const waUrl = `https://wa.me/${normalized.replace('+','')}?text=${encodeURIComponent(msg)}`;
-    window.open(waUrl, '_blank');
+    window.open(`https://wa.me/${normalized.replace('+','')}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-/* ═══════════════════════════════════════
-   INIT
-═══════════════════════════════════════ */
+/* ── Init ── */
 loadAll();
 </script>
 </body>
