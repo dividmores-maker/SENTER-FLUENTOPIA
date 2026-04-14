@@ -577,7 +577,7 @@
 
         let students           = [];
         let paymentsData       = {};
-        let attendanceSessions = [];
+        let rawStudents        = []; // الطلاب من students/data
 
         async function savePayments() {
             setFbStatus('saving', '💾 جاري الحفظ على Firebase...');
@@ -590,23 +590,17 @@
         }
 
         function buildStudentsList() {
-            const map = new Map();
-            attendanceSessions.forEach(session => {
-                (session.students || []).forEach(s => {
-                    if (!map.has(s.id)) {
-                        const pd = paymentsData[s.id] || {};
-                        map.set(s.id, {
-                            id: s.id,
-                            name: s.name,
-                            class: session.class,
-                            subscriptionPrice: pd.subscriptionPrice ?? DEFAULT_PRICE,
-                            paid: pd.paid || 0,
-                            paymentHistory: pd.history || []
-                        });
-                    }
-                });
+            students = rawStudents.map(s => {
+                const pd = paymentsData[s.id] || {};
+                return {
+                    id: s.id,
+                    name: s.name,
+                    class: s.class,
+                    subscriptionPrice: pd.subscriptionPrice ?? DEFAULT_PRICE,
+                    paid: pd.paid || 0,
+                    paymentHistory: pd.history || []
+                };
             });
-            students = Array.from(map.values());
         }
 
         async function migrateIfNeeded() {
@@ -634,8 +628,9 @@
         }
 
         function startListeners() {
-            onSnapshot(doc(db, 'dashboard', 'attendanceSessions'), snap => {
-                attendanceSessions = snap.exists() ? (snap.data().data || []) : [];
+            // ✅ نسمع على بيانات الطلاب من students/data (نفس المكان اللي بتحفظ فيه صفحة الطلاب)
+            onSnapshot(doc(db, 'students', 'data'), snap => {
+                rawStudents = snap.exists() ? (snap.data().students || []) : [];
                 buildStudentsList();
                 renderStudents();
                 setFbStatus('connected', '🔥 Firebase متصل — البيانات محدّثة لحظياً');
